@@ -1,4 +1,3 @@
-/* Tasks Page Styles */
 
 .tasks-main {
     max-width: 1400px;
@@ -630,4 +629,54 @@ textarea {
     .tasks-container {
         grid-template-columns: 1fr;
     }
+}
+/* Add to the end of tasks.css */
+
+.empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+}
+
+.empty-state i {
+    font-size: 4rem;
+    color: var(--border-color);
+    margin-bottom: 1.5rem;
+}
+
+.empty-state h3 {
+    font-size: 1.5rem;
+    color: var(--dark-color);
+    margin-bottom: 0.75rem;
+}
+
+.empty-state p {
+    color: var(--gray-color);
+    font-size: 1.1rem;
+}
+
+/* Detail actions */
+.detail-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.btn-danger {
+    background: #ef4444;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #dc2626;
+}
+
+/* Task count in board view */
+.task-count {
+    margin-left: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--gray-color);
 }
