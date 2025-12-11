@@ -1,4 +1,4 @@
-// Literature Management System - Complete JavaScript
+// Literature Management System - COMPLETE FIXED VERSION
 
 class LiteratureManager {
     constructor() {
@@ -12,30 +12,39 @@ class LiteratureManager {
         this.literatureData = [];
         this.deletingId = null;
         this.editingId = null;
+        this.viewingId = null;
         
-        this.initialize();
+        console.log('LiteratureManager initialized');
     }
     
     async initialize() {
-        // Initialize UI
-        this.initializeUI();
-        
+        console.log('Initializing...');
         // Load data
         await this.loadData();
+        
+        // Initialize UI
+        this.initializeUI();
         
         // Render everything
         this.render();
         
         // Add event listeners
         this.addEventListeners();
+        this.delegateEvents();
+        
+        console.log('Initialization complete');
     }
     
     initializeUI() {
         // Hide loading indicator
         document.getElementById('loading-indicator').style.display = 'none';
+        
+        // Set current year as default
+        document.getElementById('literature-year').value = new Date().getFullYear();
     }
     
     async loadData() {
+        console.log('Loading data...');
         // Show loading indicator
         document.getElementById('loading-indicator').style.display = 'block';
         
@@ -45,18 +54,28 @@ class LiteratureManager {
             
             if (savedData) {
                 this.literatureData = JSON.parse(savedData);
+                console.log('Loaded from localStorage:', this.literatureData.length, 'items');
             } else {
+                console.log('No localStorage data, loading from JSON...');
                 // Load initial data from JSON file
-                const response = await fetch('literature-db.json');
-                if (!response.ok) {
-                    throw new Error('Failed to load initial data');
+                try {
+                    const response = await fetch('literature-db.json');
+                    if (response.ok) {
+                        this.literatureData = await response.json();
+                        console.log('Loaded from JSON:', this.literatureData.length, 'items');
+                        this.saveToStorage();
+                    } else {
+                        throw new Error('JSON file not found');
+                    }
+                } catch (error) {
+                    console.log('Loading sample data instead...');
+                    // Load sample data if JSON file doesn't exist
+                    this.literatureData = this.getSampleData();
+                    this.saveToStorage();
                 }
-                this.literatureData = await response.json();
-                this.saveToStorage();
             }
         } catch (error) {
             console.error('Error loading data:', error);
-            // Load sample data if JSON file doesn't exist
             this.literatureData = this.getSampleData();
             this.saveToStorage();
         }
@@ -110,8 +129,13 @@ class LiteratureManager {
     }
     
     saveToStorage() {
-        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.literatureData));
-        this.updateStatistics();
+        try {
+            localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.literatureData));
+            this.updateStatistics();
+            console.log('Data saved to storage');
+        } catch (error) {
+            console.error('Error saving to storage:', error);
+        }
     }
     
     updateStatistics() {
@@ -127,6 +151,7 @@ class LiteratureManager {
     }
     
     render() {
+        console.log('Rendering...');
         // Filter data based on current settings
         let filteredData = this.filterData();
         
@@ -296,47 +321,6 @@ class LiteratureManager {
         });
     }
     
-    createListItemElement(item) {
-        const listItem = document.createElement('div');
-        listItem.className = 'list-item';
-        listItem.dataset.id = item.id;
-        
-        // Format authors for display
-        const authors = item.authors.split(';')[0];
-        const authorCount = item.authors.split(';').length;
-        
-        // Create status badge
-        const statusClass = `status-${item.status}`;
-        const statusText = item.status.charAt(0).toUpperCase() + item.status.slice(1);
-        
-        listItem.innerHTML = `
-            <div class="list-col title-col">
-                <div class="list-title">${item.title}</div>
-                <div class="list-authors">${authors} ${authorCount > 1 ? `(+${authorCount - 1} authors)` : ''}</div>
-            </div>
-            <div class="list-col journal-col">${item.journal}</div>
-            <div class="list-col year-col">${item.year}</div>
-            <div class="list-col status-col">
-                <span class="status-badge ${statusClass}">${statusText}</span>
-            </div>
-            <div class="list-col actions-col">
-                <div class="list-actions">
-                    <button class="card-action-btn btn-view" data-id="${item.id}" title="View Details">
-                        <i class="fas fa-eye"></i>
-                    </button>
-                    <button class="card-action-btn ${item.saved ? 'btn-save saved' : 'btn-save'}" data-id="${item.id}" title="${item.saved ? 'Remove from saved' : 'Save to collection'}">
-                        <i class="${item.saved ? 'fas' : 'far'} fa-bookmark"></i>
-                    </button>
-                    <button class="card-action-btn btn-cite" data-id="${item.id}" title="Copy Citation">
-                        <i class="fas fa-quote-right"></i>
-                    </button>
-                </div>
-            </div>
-        `;
-        
-        return listItem;
-    }
-    
     renderPagination(totalPages) {
         const pageNumbers = document.getElementById('page-numbers');
         const prevBtn = document.getElementById('prev-page');
@@ -369,12 +353,25 @@ class LiteratureManager {
     }
     
     addEventListeners() {
+        console.log('Adding event listeners...');
+        
         // Search functionality
-        document.getElementById('search-btn').addEventListener('click', () => this.handleSearch());
-        document.getElementById('search-input').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') this.handleSearch();
-        });
-        document.getElementById('clear-search-btn').addEventListener('click', () => this.clearSearch());
+        const searchBtn = document.getElementById('search-btn');
+        if (searchBtn) {
+            searchBtn.addEventListener('click', () => this.handleSearch());
+        }
+        
+        const searchInput = document.getElementById('search-input');
+        if (searchInput) {
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') this.handleSearch();
+            });
+        }
+        
+        const clearSearchBtn = document.getElementById('clear-search-btn');
+        if (clearSearchBtn) {
+            clearSearchBtn.addEventListener('click', () => this.clearSearch());
+        }
         
         // Filter buttons
         document.querySelectorAll('.filter-tag').forEach(btn => {
@@ -392,39 +389,94 @@ class LiteratureManager {
         });
         
         // Add literature buttons
-        document.getElementById('add-literature-btn').addEventListener('click', () => this.openAddModal());
-        document.getElementById('add-empty-btn').addEventListener('click', () => this.openAddModal());
-        document.getElementById('quick-add-btn').addEventListener('click', () => this.openAddModal());
+        const addButtons = [
+            'add-literature-btn',
+            'add-empty-btn', 
+            'quick-add-btn'
+        ];
         
-        // Modal controls
-        document.getElementById('modal-close-btn').addEventListener('click', () => this.closeModal());
-        document.getElementById('modal-cancel-btn').addEventListener('click', () => this.closeModal());
-        document.getElementById('modal-save-btn').addEventListener('click', () => this.saveLiterature());
-        
-        // View modal controls
-        document.getElementById('view-modal-close-btn').addEventListener('click', () => this.closeViewModal());
-        document.getElementById('view-close-btn').addEventListener('click', () => this.closeViewModal());
-        document.getElementById('view-edit-btn').addEventListener('click', () => this.editCurrentLiterature());
-        document.getElementById('view-cite-btn').addEventListener('click', () => this.copyCitation());
-        
-        // Delete modal controls
-        document.getElementById('delete-modal-close-btn').addEventListener('click', () => this.closeDeleteModal());
-        document.getElementById('delete-cancel-btn').addEventListener('click', () => this.closeDeleteModal());
-        document.getElementById('delete-confirm-btn').addEventListener('click', () => this.confirmDelete());
-        
-        // Import/Export modal
-        document.getElementById('import-export-close-btn').addEventListener('click', () => this.closeImportExportModal());
-        document.getElementById('import-export-cancel-btn').addEventListener('click', () => this.closeImportExportModal());
-        
-        // Form submission
-        document.getElementById('literature-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.saveLiterature();
+        addButtons.forEach(id => {
+            const btn = document.getElementById(id);
+            if (btn) {
+                btn.addEventListener('click', () => this.openAddModal());
+            }
         });
         
+        // Modal controls
+        const modalCloseBtn = document.getElementById('modal-close-btn');
+        if (modalCloseBtn) {
+            modalCloseBtn.addEventListener('click', () => this.closeModal());
+        }
+        
+        const modalCancelBtn = document.getElementById('modal-cancel-btn');
+        if (modalCancelBtn) {
+            modalCancelBtn.addEventListener('click', () => this.closeModal());
+        }
+        
+        const modalSaveBtn = document.getElementById('modal-save-btn');
+        if (modalSaveBtn) {
+            modalSaveBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.saveLiterature();
+            });
+        }
+        
+        // Form submission
+        const literatureForm = document.getElementById('literature-form');
+        if (literatureForm) {
+            literatureForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.saveLiterature();
+            });
+        }
+        
+        // View modal controls
+        const viewModalCloseBtn = document.getElementById('view-modal-close-btn');
+        if (viewModalCloseBtn) {
+            viewModalCloseBtn.addEventListener('click', () => this.closeViewModal());
+        }
+        
+        const viewCloseBtn = document.getElementById('view-close-btn');
+        if (viewCloseBtn) {
+            viewCloseBtn.addEventListener('click', () => this.closeViewModal());
+        }
+        
+        const viewEditBtn = document.getElementById('view-edit-btn');
+        if (viewEditBtn) {
+            viewEditBtn.addEventListener('click', () => this.editCurrentLiterature());
+        }
+        
+        const viewCiteBtn = document.getElementById('view-cite-btn');
+        if (viewCiteBtn) {
+            viewCiteBtn.addEventListener('click', () => this.copyCitation());
+        }
+        
+        // Delete modal controls
+        const deleteModalCloseBtn = document.getElementById('delete-modal-close-btn');
+        if (deleteModalCloseBtn) {
+            deleteModalCloseBtn.addEventListener('click', () => this.closeDeleteModal());
+        }
+        
+        const deleteCancelBtn = document.getElementById('delete-cancel-btn');
+        if (deleteCancelBtn) {
+            deleteCancelBtn.addEventListener('click', () => this.closeDeleteModal());
+        }
+        
+        const deleteConfirmBtn = document.getElementById('delete-confirm-btn');
+        if (deleteConfirmBtn) {
+            deleteConfirmBtn.addEventListener('click', () => this.confirmDelete());
+        }
+        
         // Pagination
-        document.getElementById('prev-page').addEventListener('click', () => this.goToPage(this.currentPage - 1));
-        document.getElementById('next-page').addEventListener('click', () => this.goToPage(this.currentPage + 1));
+        const prevPageBtn = document.getElementById('prev-page');
+        if (prevPageBtn) {
+            prevPageBtn.addEventListener('click', () => this.goToPage(this.currentPage - 1));
+        }
+        
+        const nextPageBtn = document.getElementById('next-page');
+        if (nextPageBtn) {
+            nextPageBtn.addEventListener('click', () => this.goToPage(this.currentPage + 1));
+        }
         
         // Close modals when clicking outside
         document.querySelectorAll('.modal').forEach(modal => {
@@ -439,6 +491,71 @@ class LiteratureManager {
         });
     }
     
+    delegateEvents() {
+        document.addEventListener('click', (e) => {
+            const target = e.target;
+            
+            // View button
+            if (target.closest('.btn-view')) {
+                const btn = target.closest('.btn-view');
+                const id = parseInt(btn.dataset.id);
+                console.log('View button clicked for id:', id);
+                this.viewLiterature(id);
+            }
+            
+            // Save button
+            else if (target.closest('.btn-save')) {
+                const btn = target.closest('.btn-save');
+                const id = parseInt(btn.dataset.id);
+                console.log('Save button clicked for id:', id);
+                this.toggleSave(id);
+            }
+            
+            // Cite button
+            else if (target.closest('.btn-cite')) {
+                const btn = target.closest('.btn-cite');
+                const id = parseInt(btn.dataset.id);
+                console.log('Cite button clicked for id:', id);
+                const item = this.literatureData.find(i => i.id === id);
+                if (item) {
+                    const citation = this.generateCitation(item);
+                    navigator.clipboard.writeText(citation.replace(/<[^>]*>/g, ''))
+                        .then(() => {
+                            this.showNotification('Citation copied to clipboard!');
+                        })
+                        .catch(err => {
+                            console.error('Failed to copy:', err);
+                            this.showNotification('Failed to copy citation', 'error');
+                        });
+                }
+            }
+            
+            // Edit button
+            else if (target.closest('.btn-edit')) {
+                const btn = target.closest('.btn-edit');
+                const id = parseInt(btn.dataset.id);
+                console.log('Edit button clicked for id:', id);
+                this.openAddModal(id);
+            }
+            
+            // Delete button
+            else if (target.closest('.btn-delete')) {
+                const btn = target.closest('.btn-delete');
+                const id = parseInt(btn.dataset.id);
+                console.log('Delete button clicked for id:', id);
+                this.promptDelete(id);
+            }
+            
+            // Page number buttons
+            else if (target.closest('.page-number')) {
+                const btn = target.closest('.page-number');
+                const page = parseInt(btn.dataset.page);
+                console.log('Page button clicked:', page);
+                this.goToPage(page);
+            }
+        });
+    }
+    
     handleSearch() {
         const searchInput = document.getElementById('search-input');
         this.currentSearch = searchInput.value.trim();
@@ -446,7 +563,9 @@ class LiteratureManager {
         
         // Show/hide clear button
         const clearBtn = document.getElementById('clear-search-btn');
-        clearBtn.style.display = this.currentSearch ? 'block' : 'none';
+        if (clearBtn) {
+            clearBtn.style.display = this.currentSearch ? 'block' : 'none';
+        }
         
         this.render();
     }
@@ -507,6 +626,7 @@ class LiteratureManager {
     }
     
     openAddModal(itemId = null) {
+        console.log('Opening add modal, itemId:', itemId);
         const modal = document.getElementById('literature-modal');
         const title = document.getElementById('modal-title');
         const form = document.getElementById('literature-form');
@@ -537,22 +657,34 @@ class LiteratureManager {
             // Add mode
             title.textContent = 'Add New Literature';
             this.editingId = null;
-            form.reset();
+            if (form) form.reset();
             document.getElementById('literature-id').value = '';
             document.getElementById('literature-year').value = new Date().getFullYear();
+            document.getElementById('literature-status').value = 'reviewed';
+            document.getElementById('literature-priority').value = 'medium';
         }
         
-        modal.style.display = 'flex';
-        document.getElementById('literature-title').focus();
+        if (modal) {
+            modal.style.display = 'flex';
+            document.getElementById('literature-title')?.focus();
+        }
     }
     
     closeModal() {
-        document.getElementById('literature-modal').style.display = 'none';
-        document.getElementById('literature-form').reset();
+        const modal = document.getElementById('literature-modal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+        const form = document.getElementById('literature-form');
+        if (form) {
+            form.reset();
+        }
         this.editingId = null;
     }
     
     saveLiterature() {
+        console.log('Saving literature...');
+        
         // Get form values
         const id = document.getElementById('literature-id').value;
         const title = document.getElementById('literature-title').value.trim();
@@ -602,6 +734,7 @@ class LiteratureManager {
                 literature.saved = this.literatureData[index].saved;
                 literature.id = parseInt(id);
                 this.literatureData[index] = literature;
+                console.log('Updated item:', literature);
             }
         } else {
             // Add new item
@@ -610,6 +743,7 @@ class LiteratureManager {
                 : 1;
             literature.id = newId;
             this.literatureData.push(literature);
+            console.log('Added new item:', literature);
         }
         
         // Save to storage and re-render
@@ -624,329 +758,4 @@ class LiteratureManager {
     showNotification(message, type = 'success') {
         // Create notification element
         const notification = document.createElement('div');
-        notification.className = `notification ${type}`;
-        notification.innerHTML = `
-            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
-            <span>${message}</span>
-        `;
-        
-        // Add to page
-        document.body.appendChild(notification);
-        
-        // Remove after 3 seconds
-        setTimeout(() => {
-            notification.classList.add('fade-out');
-            setTimeout(() => {
-                document.body.removeChild(notification);
-            }, 300);
-        }, 3000);
-    }
-    
-    viewLiterature(id) {
-        const item = this.literatureData.find(i => i.id === id);
-        if (!item) return;
-        
-        const modal = document.getElementById('view-modal');
-        const content = document.getElementById('view-content');
-        
-        // Format authors list
-        const authorsList = item.authors.split(';').map(author => 
-            `<li>${author.trim()}</li>`
-        ).join('');
-        
-        // Format tags
-        const tagsHTML = item.tags.map(tag => 
-            `<span class="view-tag">${tag}</span>`
-        ).join('');
-        
-        // Create citation
-        const citation = this.generateCitation(item);
-        
-        content.innerHTML = `
-            <div class="view-field">
-                <label>Title</label>
-                <p>${item.title}</p>
-            </div>
-            <div class="view-field">
-                <label>Authors</label>
-                <ul style="margin-left: 20px; margin-top: 5px;">${authorsList}</ul>
-            </div>
-            <div class="view-field">
-                <label>Publication Details</label>
-                <p>
-                    <strong>Journal:</strong> ${item.journal}<br>
-                    <strong>Year:</strong> ${item.year}<br>
-                    ${item.volume ? `<strong>Volume:</strong> ${item.volume}<br>` : ''}
-                    ${item.pages ? `<strong>Pages:</strong> ${item.pages}<br>` : ''}
-                    ${item.doi ? `<strong>DOI:</strong> ${item.doi}<br>` : ''}
-                </p>
-            </div>
-            <div class="view-field">
-                <label>Status & Priority</label>
-                <p>
-                    <strong>Status:</strong> <span class="status-badge status-${item.status}">${item.status.charAt(0).toUpperCase() + item.status.slice(1)}</span><br>
-                    <strong>Priority:</strong> ${item.priority ? item.priority.charAt(0).toUpperCase() + item.priority.slice(1) : 'Medium'}
-                </p>
-            </div>
-            <div class="view-field">
-                <label>Abstract</label>
-                <p>${item.abstract}</p>
-            </div>
-            <div class="view-field">
-                <label>Tags</label>
-                <div class="view-tags">${tagsHTML}</div>
-            </div>
-            <div class="view-field">
-                <label>Citation</label>
-                <p style="font-style: italic; background: #f8f9fa; padding: 10px; border-radius: 5px;">
-                    ${citation}
-                </p>
-            </div>
-            ${item.notes ? `
-            <div class="view-field">
-                <label>Personal Notes</label>
-                <p style="background: #fff8e1; padding: 10px; border-radius: 5px; border-left: 4px solid #ff9800;">
-                    ${item.notes}
-                </p>
-            </div>
-            ` : ''}
-            <div class="view-field">
-                <label>Additional Information</label>
-                <p>
-                    ${item.url ? `<strong>URL:</strong> <a href="${item.url}" target="_blank">${item.url}</a><br>` : ''}
-                    <strong>Added:</strong> ${item.addedDate || 'Unknown'}<br>
-                    <strong>Saved:</strong> ${item.saved ? 'Yes' : 'No'}
-                </p>
-            </div>
-        `;
-        
-        // Store current item ID for edit button
-        this.viewingId = id;
-        
-        modal.style.display = 'flex';
-    }
-    
-    closeViewModal() {
-        document.getElementById('view-modal').style.display = 'none';
-        this.viewingId = null;
-    }
-    
-    editCurrentLiterature() {
-        if (this.viewingId) {
-            this.closeViewModal();
-            this.openAddModal(this.viewingId);
-        }
-    }
-    
-    generateCitation(item) {
-        // Format authors
-        const authors = item.authors.split(';');
-        let authorString;
-        
-        if (authors.length === 1) {
-            authorString = authors[0].trim();
-        } else if (authors.length === 2) {
-            authorString = `${authors[0].trim()} and ${authors[1].trim()}`;
-        } else {
-            authorString = `${authors[0].trim()} et al.`;
-        }
-        
-        // Build citation
-        let citation = `${authorString} (${item.year}). ${item.title}. `;
-        citation += `<em>${item.journal}</em>`;
-        
-        if (item.volume) {
-            citation += `, ${item.volume}`;
-            if (item.pages) {
-                citation += `, ${item.pages}`;
-            }
-        } else if (item.pages) {
-            citation += `, ${item.pages}`;
-        }
-        
-        citation += '.';
-        
-        if (item.doi) {
-            citation += ` https://doi.org/${item.doi}`;
-        }
-        
-        return citation;
-    }
-    
-    copyCitation() {
-        if (!this.viewingId) return;
-        
-        const item = this.literatureData.find(i => i.id === this.viewingId);
-        if (!item) return;
-        
-        const citation = this.generateCitation(item);
-        
-        // Copy to clipboard
-        navigator.clipboard.writeText(citation.replace(/<[^>]*>/g, ''))
-            .then(() => {
-                this.showNotification('Citation copied to clipboard!');
-            })
-            .catch(err => {
-                console.error('Failed to copy citation:', err);
-                this.showNotification('Failed to copy citation', 'error');
-            });
-    }
-    
-    toggleSave(id) {
-        const item = this.literatureData.find(i => i.id === id);
-        if (item) {
-            item.saved = !item.saved;
-            this.saveToStorage();
-            this.render();
-            
-            this.showNotification(
-                item.saved ? 'Added to saved collection!' : 'Removed from saved collection',
-                'success'
-            );
-        }
-    }
-    
-    confirmDelete() {
-        if (!this.deletingId) return;
-        
-        const index = this.literatureData.findIndex(item => item.id === this.deletingId);
-        if (index !== -1) {
-            this.literatureData.splice(index, 1);
-            this.saveToStorage();
-            this.render();
-            
-            this.showNotification('Literature deleted successfully!');
-        }
-        
-        this.closeDeleteModal();
-    }
-    
-    promptDelete(id) {
-        const item = this.literatureData.find(i => i.id === id);
-        if (!item) return;
-        
-        this.deletingId = id;
-        const modal = document.getElementById('delete-modal');
-        const preview = document.getElementById('delete-preview');
-        
-        preview.innerHTML = `
-            <strong>${item.title}</strong><br>
-            <small>${item.authors.split(';')[0]} (${item.year})</small>
-        `;
-        
-        modal.style.display = 'flex';
-    }
-    
-    closeDeleteModal() {
-        document.getElementById('delete-modal').style.display = 'none';
-        this.deletingId = null;
-    }
-    
-    // Delegate events for dynamically created elements
-    delegateEvents() {
-        document.addEventListener('click', (e) => {
-            const target = e.target;
-            
-            // View button
-            if (target.closest('.btn-view')) {
-                const id = parseInt(target.closest('.btn-view').dataset.id);
-                this.viewLiterature(id);
-            }
-            
-            // Save button
-            else if (target.closest('.btn-save')) {
-                const id = parseInt(target.closest('.btn-save').dataset.id);
-                this.toggleSave(id);
-            }
-            
-            // Cite button
-            else if (target.closest('.btn-cite')) {
-                const id = parseInt(target.closest('.btn-cite').dataset.id);
-                const item = this.literatureData.find(i => i.id === id);
-                if (item) {
-                    const citation = this.generateCitation(item);
-                    navigator.clipboard.writeText(citation.replace(/<[^>]*>/g, ''))
-                        .then(() => {
-                            this.showNotification('Citation copied to clipboard!');
-                        });
-                }
-            }
-            
-            // Edit button
-            else if (target.closest('.btn-edit')) {
-                const id = parseInt(target.closest('.btn-edit').dataset.id);
-                this.openAddModal(id);
-            }
-            
-            // Delete button
-            else if (target.closest('.btn-delete')) {
-                const id = parseInt(target.closest('.btn-delete').dataset.id);
-                this.promptDelete(id);
-            }
-            
-            // Page number buttons
-            else if (target.closest('.page-number')) {
-                const page = parseInt(target.closest('.page-number').dataset.page);
-                this.goToPage(page);
-            }
-        });
-    }
-}
-
-// Add notification styles
-const notificationStyles = document.createElement('style');
-notificationStyles.textContent = `
-    .notification {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: #4caf50;
-        color: white;
-        padding: 15px 20px;
-        border-radius: 8px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        z-index: 3000;
-        animation: slideIn 0.3s ease;
-        max-width: 400px;
-    }
-    
-    .notification.error {
-        background: #f44336;
-    }
-    
-    .notification.fade-out {
-        animation: fadeOut 0.3s ease forwards;
-    }
-    
-    @keyframes slideIn {
-        from {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
-    }
-    
-    @keyframes fadeOut {
-        to {
-            opacity: 0;
-            transform: translateX(100%);
-        }
-    }
-`;
-
-document.head.appendChild(notificationStyles);
-
-// Initialize the application when the page loads
-document.addEventListener('DOMContentLoaded', () => {
-    const app = new LiteratureManager();
-    app.delegateEvents();
-    
-    // Make app available globally for debugging
-    window.literatureApp = app;
-});
+        notification
