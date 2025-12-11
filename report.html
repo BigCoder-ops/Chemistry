@@ -1,0 +1,2638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Editor | Project Volta</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    /* Report Editor Styles */
+
+.report-main {
+    max-width: 1800px;
+    margin: 80px auto 0;
+    padding: 2rem;
+    min-height: calc(100vh - 80px);
+}
+
+/* Report Header */
+.report-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
+.header-left h1 {
+    color: var(--dark-color);
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.report-subtitle {
+    color: var(--gray-color);
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.report-info {
+    display: flex;
+    gap: 1.5rem;
+    background: white;
+    padding: 1rem 1.5rem;
+    border-radius: 1rem;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--gray-color);
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.info-item i {
+    color: var(--primary-color);
+}
+
+/* Report Controls */
+.report-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    padding: 1rem 1.5rem;
+    border-radius: 1rem;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.controls-left, .controls-right {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.control-btn {
+    padding: 0.75rem 1.25rem;
+    border: 2px solid var(--border-color);
+    background: white;
+    border-radius: 0.75rem;
+    font-weight: 500;
+    color: var(--gray-color);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.control-btn:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+.control-btn.primary {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+.control-btn.primary:hover {
+    background: #1d4ed8;
+    border-color: #1d4ed8;
+}
+
+.control-btn.secondary {
+    background: rgba(37, 99, 235, 0.1);
+    border-color: rgba(37, 99, 235, 0.2);
+    color: var(--primary-color);
+}
+
+.control-btn.preview {
+    background: rgba(16, 185, 129, 0.1);
+    border-color: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+}
+
+/* Report Container */
+.report-container {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    min-height: 600px;
+}
+
+/* Editor and Preview Panels */
+.editor-panel, .preview-panel {
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    min-height: 600px;
+}
+
+.editor-panel.active {
+    grid-column: 1;
+}
+
+.preview-panel {
+    grid-column: 1;
+    display: none;
+}
+
+.report-container.split-view .editor-panel,
+.report-container.split-view .preview-panel {
+    grid-column: 1;
+    display: flex;
+}
+
+.report-container.split-view .preview-panel {
+    grid-column: 2;
+}
+
+.report-container.preview-only .editor-panel {
+    display: none;
+}
+
+.report-container.preview-only .preview-panel {
+    grid-column: 1 / -1;
+    display: flex;
+}
+
+.panel-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.panel-header h3 {
+    font-size: 1.1rem;
+    color: var(--dark-color);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 600;
+}
+
+.panel-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.panel-btn {
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--border-color);
+    background: white;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--gray-color);
+    transition: all 0.3s ease;
+}
+
+.panel-btn:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.panel-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Section Selector */
+.section-selector {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+#sectionSelector {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 0.5rem;
+    background: white;
+    color: var(--dark-color);
+    font-weight: 500;
+    font-size: 0.95rem;
+    cursor: pointer;
+}
+
+#sectionSelector:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.btn-add-section {
+    padding: 0.75rem 1.25rem;
+    background: rgba(37, 99, 235, 0.1);
+    color: var(--primary-color);
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+}
+
+.btn-add-section:hover {
+    background: rgba(37, 99, 235, 0.2);
+}
+
+/* Editor Container */
+.editor-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+#reportEditor {
+    flex: 1;
+    padding: 1.5rem;
+    border: none;
+    outline: none;
+    resize: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--dark-color);
+    background: white;
+    overflow-y: auto;
+}
+
+#reportEditor:focus {
+    outline: none;
+}
+
+#reportEditor::placeholder {
+    color: var(--gray-color);
+    opacity: 0.7;
+}
+
+.editor-toolbar {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+    background: rgba(37, 99, 235, 0.02);
+}
+
+.toolbar-btn {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border-color);
+    background: white;
+    border-radius: 0.25rem;
+    color: var(--gray-color);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.9rem;
+}
+
+.toolbar-btn:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    background: rgba(37, 99, 235, 0.05);
+}
+
+.toolbar-divider {
+    width: 1px;
+    height: 24px;
+    background: var(--border-color);
+    margin: 0 0.5rem;
+}
+
+/* Preview Container */
+.preview-container {
+    flex: 1;
+    padding: 1.5rem;
+    overflow-y: auto;
+    font-family: 'Inter', sans-serif;
+    line-height: 1.6;
+    color: var(--dark-color);
+}
+
+.preview-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.preview-content h1,
+.preview-content h2,
+.preview-content h3,
+.preview-content h4 {
+    color: var(--dark-color);
+    margin-top: 1.5em;
+    margin-bottom: 0.75em;
+    font-weight: 600;
+}
+
+.preview-content h1 {
+    font-size: 2rem;
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 0.5rem;
+}
+
+.preview-content h2 {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+}
+
+.preview-content h3 {
+    font-size: 1.25rem;
+}
+
+.preview-content p {
+    margin-bottom: 1em;
+    text-align: justify;
+}
+
+.preview-content ul,
+.preview-content ol {
+    margin-bottom: 1em;
+    padding-left: 2em;
+}
+
+.preview-content li {
+    margin-bottom: 0.5em;
+}
+
+.preview-content blockquote {
+    border-left: 4px solid var(--primary-color);
+    padding-left: 1rem;
+    margin-left: 0;
+    color: var(--gray-color);
+    font-style: italic;
+}
+
+.preview-content code {
+    background: rgba(37, 99, 235, 0.1);
+    padding: 0.2em 0.4em;
+    border-radius: 0.25rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9em;
+}
+
+.preview-content pre {
+    background: #f8fafc;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+    margin: 1em 0;
+}
+
+.preview-content pre code {
+    background: none;
+    padding: 0;
+}
+
+.preview-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5em 0;
+}
+
+.preview-content table th,
+.preview-content table td {
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    text-align: left;
+}
+
+.preview-content table th {
+    background: rgba(37, 99, 235, 0.05);
+    font-weight: 600;
+}
+
+.preview-content a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.preview-content a:hover {
+    text-decoration: underline;
+}
+
+.preview-content .equation {
+    text-align: center;
+    margin: 1.5em 0;
+    padding: 1em;
+    background: #f8fafc;
+    border-radius: 0.5rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.1em;
+    overflow-x: auto;
+}
+
+/* Sidebar */
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    width: 320px;
+}
+
+.sidebar-section {
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.sidebar-header {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sidebar-header h4 {
+    font-size: 1rem;
+    color: var(--dark-color);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+}
+
+.sidebar-btn {
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--border-color);
+    background: white;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--gray-color);
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.sidebar-btn:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.sidebar-content {
+    padding: 1rem;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+/* References List */
+.references-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.reference-item {
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    background: white;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.reference-item:hover {
+    border-color: var(--primary-color);
+    background: rgba(37, 99, 235, 0.03);
+}
+
+.reference-item.selected {
+    border-color: var(--primary-color);
+    background: rgba(37, 99, 235, 0.08);
+}
+
+.reference-citation {
+    font-size: 0.85rem;
+    color: var(--dark-color);
+    line-height: 1.4;
+    margin-bottom: 0.25rem;
+}
+
+.reference-author {
+    font-size: 0.8rem;
+    color: var(--gray-color);
+}
+
+/* Tasks List */
+.tasks-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.sidebar-task {
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    background: white;
+    transition: all 0.3s ease;
+}
+
+.sidebar-task:hover {
+    border-color: var(--primary-color);
+}
+
+.task-title {
+    font-size: 0.9rem;
+    color: var(--dark-color);
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+}
+
+.task-phase {
+    font-size: 0.8rem;
+    color: var(--gray-color);
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+/* Notes Editor */
+.notes-editor {
+    width: 100%;
+    min-height: 150px;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--dark-color);
+    resize: vertical;
+    background: white;
+}
+
+.notes-editor:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+/* Report Statistics */
+.report-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+}
+
+.stat-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 1rem;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    background: rgba(37, 99, 235, 0.1);
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.stat-icon i {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+}
+
+.stat-info h3 {
+    font-size: 1.75rem;
+    color: var(--dark-color);
+    margin-bottom: 0.25rem;
+    font-weight: 700;
+}
+
+.stat-info p {
+    color: var(--gray-color);
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+/* Modals */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.modal.active {
+    display: flex;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-content {
+    background: white;
+    border-radius: 1rem;
+    width: 100%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-header {
+    padding: 1.5rem 1.5rem 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    font-size: 1.5rem;
+    color: var(--dark-color);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.close-modal {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--gray-color);
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+
+.close-modal:hover {
+    color: var(--dark-color);
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+/* Citation Modal */
+.citation-search {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+#citationSearch {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 0.5rem;
+    font-size: 1rem;
+}
+
+.search-btn {
+    padding: 0.75rem 1.5rem;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.citation-list {
+    max-height: 400px;
+    overflow-y: auto;
+    margin-bottom: 1.5rem;
+}
+
+/* Equation Modal */
+.equation-preview {
+    padding: 1.5rem;
+    background: #f8fafc;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    font-size: 1.25rem;
+    font-family: 'JetBrains Mono', monospace;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#equationInput {
+    width: 100%;
+    min-height: 100px;
+    padding: 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 0.5rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+    resize: vertical;
+}
+
+.equation-templates {
+    margin-bottom: 1.5rem;
+}
+
+.equation-templates h4 {
+    margin-bottom: 1rem;
+    color: var(--dark-color);
+}
+
+.template-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+}
+
+.template-btn {
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    background: white;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.template-btn:hover {
+    border-color: var(--primary-color);
+    background: rgba(37, 99, 235, 0.05);
+}
+
+/* Formatting Guide */
+.formatting-guide table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.5rem;
+}
+
+.formatting-guide th,
+.formatting-guide td {
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    text-align: left;
+    vertical-align: top;
+}
+
+.formatting-guide th {
+    background: rgba(37, 99, 235, 0.05);
+    font-weight: 600;
+}
+
+.formatting-guide code {
+    background: rgba(37, 99, 235, 0.1);
+    padding: 0.2em 0.4em;
+    border-radius: 0.25rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9em;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .report-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .sidebar {
+        width: 100%;
+        grid-row: 2;
+    }
+    
+    .sidebar-content {
+        max-height: 200px;
+    }
+}
+
+@media (max-width: 768px) {
+    .report-main {
+        padding: 1rem;
+        margin-top: 60px;
+    }
+    
+    .report-header {
+        flex-direction: column;
+    }
+    
+    .header-left h1 {
+        font-size: 2rem;
+    }
+    
+    .report-info {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .report-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .controls-left, .controls-right {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .report-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .modal-content {
+        max-width: 95%;
+    }
+}
+
+@media (max-width: 480px) {
+    .report-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .section-selector {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .template-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Dark Mode Support */
+[data-theme="dark"] .report-header h1,
+[data-theme="dark"] .panel-header h3,
+[data-theme="dark"] .preview-content h1,
+[data-theme="dark"] .preview-content h2,
+[data-theme="dark"] .preview-content h3,
+[data-theme="dark"] .preview-content h4,
+[data-theme="dark"] .task-title,
+[data-theme="dark"] .reference-citation,
+[data-theme="dark"] .stat-info h3 {
+    color: #f3f4f6;
+}
+
+[data-theme="dark"] .report-subtitle,
+[data-theme="dark"] .info-item,
+[data-theme="dark"] .task-phase,
+[data-theme="dark"] .reference-author,
+[data-theme="dark"] .stat-info p {
+    color: #9ca3af;
+}
+
+[data-theme="dark"] .report-info,
+[data-theme="dark"] .report-controls,
+[data-theme="dark"] .editor-panel,
+[data-theme="dark"] .preview-panel,
+[data-theme="dark"] .sidebar-section,
+[data-theme="dark"] .stat-card,
+[data-theme="dark"] .modal-content {
+    background: #1a1a1a;
+    color: #e0e0e0;
+}
+
+[data-theme="dark"] #reportEditor,
+[data-theme="dark"] .notes-editor,
+[data-theme="dark"] #equationInput,
+[data-theme="dark"] #citationSearch,
+[data-theme="dark"] .template-btn {
+    background: #2a2a2a;
+    color: #e0e0e0;
+    border-color: #333;
+}
+
+[data-theme="dark"] .preview-content {
+    color: #e0e0e0;
+}
+
+[data-theme="dark"] .preview-content code {
+    background: #2a2a2a;
+}
+
+[data-theme="dark"] .preview-content pre {
+    background: #2a2a2a;
+}
+
+[data-theme="dark"] .preview-content table th,
+[data-theme="dark"] .preview-content table td {
+    border-color: #333;
+}
+
+[data-theme="dark"] .preview-content table th {
+    background: #2a2a2a;
+}
+
+[data-theme="dark"] .equation-preview {
+    background: #2a2a2a;
+}
+  </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-battery-full"></i>
+                <span>Project Volta</span>
+            </div>
+            <div class="nav-links">
+                <a href="index.html"><i class="fas fa-home"></i> Home</a>
+                <a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                <a href="tasks.html"><i class="fas fa-tasks"></i> Tasks</a>
+                <a href="literature.html"><i class="fas fa-book"></i> Literature</a>
+                <a href="report.html" class="active"><i class="fas fa-file-alt"></i> Report</a>
+                <a href="presentation.html"><i class="fas fa-presentation"></i> Presentation</a>
+            </div>
+            <div class="nav-user">
+                <span id="userName">Researcher</span>
+                <i class="fas fa-user-circle"></i>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Report Main Content -->
+    <main class="report-main">
+        <!-- Report Header -->
+        <div class="report-header">
+            <div class="header-left">
+                <h1><i class="fas fa-file-alt"></i> Report Editor</h1>
+                <p class="report-subtitle">Critical Raw Materials & Batteries - Wicked Problem Analysis</p>
+            </div>
+            <div class="header-right">
+                <div class="report-info">
+                    <div class="info-item">
+                        <i class="fas fa-ruler"></i>
+                        <span>Target: 10 pages</span>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-save"></i>
+                        <span>Auto-saved</span>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-clock"></i>
+                        <span id="lastSaved">Just now</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Report Controls -->
+        <div class="report-controls">
+            <div class="controls-left">
+                <button class="control-btn" id="toggleViewBtn">
+                    <i class="fas fa-columns"></i>
+                    <span>Split View</span>
+                </button>
+                <button class="control-btn" id="wordCountBtn">
+                    <i class="fas fa-font"></i>
+                    <span>Words: <span id="wordCount">0</span></span>
+                </button>
+                <button class="control-btn" id="insertCitationBtn">
+                    <i class="fas fa-quote-right"></i>
+                    <span>Insert Citation</span>
+                </button>
+                <button class="control-btn" id="insertEquationBtn">
+                    <i class="fas fa-square-root-alt"></i>
+                    <span>Insert Equation</span>
+                </button>
+            </div>
+            <div class="controls-right">
+                <button class="control-btn secondary" id="exportBtn">
+                    <i class="fas fa-download"></i>
+                    <span>Export</span>
+                </button>
+                <button class="control-btn primary" id="saveBtn">
+                    <i class="fas fa-save"></i>
+                    <span>Save</span>
+                </button>
+                <button class="control-btn preview" id="previewBtn">
+                    <i class="fas fa-eye"></i>
+                    <span>Preview</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Report Editor Container -->
+        <div class="report-container">
+            <!-- Editor Panel -->
+            <div class="editor-panel active" id="editorPanel">
+                <div class="panel-header">
+                    <h3><i class="fas fa-edit"></i> Editor</h3>
+                    <div class="panel-actions">
+                        <button class="panel-btn" id="formatHelpBtn" title="Formatting Help">
+                            <i class="fas fa-question-circle"></i>
+                        </button>
+                        <button class="panel-btn" id="clearBtn" title="Clear Editor">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="panel-content">
+                    <div class="section-selector">
+                        <select id="sectionSelector">
+                            <option value="introduction">1. Introduction</option>
+                            <option value="scientific-background">2. Scientific Background</option>
+                            <option value="current-solutions">3. Current Solutions</option>
+                            <option value="chemical-analysis">4. Quantitative Analysis</option>
+                            <option value="proposed-strategies">5. Proposed Strategies</option>
+                            <option value="evaluation">6. Environmental/Economic/Societal Evaluation</option>
+                            <option value="trade-offs">7. Key Trade-offs</option>
+                            <option value="conclusion">8. Conclusion</option>
+                            <option value="references">9. References</option>
+                        </select>
+                        <button class="btn-add-section" id="addSectionBtn">
+                            <i class="fas fa-plus"></i> Add Section
+                        </button>
+                    </div>
+                    
+                    <div class="editor-container">
+                        <textarea id="reportEditor" placeholder="Start writing your report here... 
+                        
+Use Markdown formatting:
+# Heading 1
+## Heading 2
+**Bold text**
+*Italic text*
+- Bullet points
+1. Numbered lists
+
+Insert citations: [1], [2]
+Insert equations: $E = mc^2$
+
+The editor auto-saves your work."></textarea>
+                        
+                        <div class="editor-toolbar">
+                            <button class="toolbar-btn" data-format="bold"><i class="fas fa-bold"></i></button>
+                            <button class="toolbar-btn" data-format="italic"><i class="fas fa-italic"></i></button>
+                            <button class="toolbar-btn" data-format="heading1"><i class="fas fa-heading"></i>1</button>
+                            <button class="toolbar-btn" data-format="heading2"><i class="fas fa-heading"></i>2</button>
+                            <button class="toolbar-btn" data-format="bullets"><i class="fas fa-list-ul"></i></button>
+                            <button class="toolbar-btn" data-format="numbers"><i class="fas fa-list-ol"></i></button>
+                            <button class="toolbar-btn" data-format="link"><i class="fas fa-link"></i></button>
+                            <button class="toolbar-btn" data-format="quote"><i class="fas fa-quote-right"></i></button>
+                            <div class="toolbar-divider"></div>
+                            <button class="toolbar-btn" id="insertTableBtn"><i class="fas fa-table"></i> Table</button>
+                            <button class="toolbar-btn" id="insertFigureBtn"><i class="fas fa-image"></i> Figure</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preview Panel -->
+            <div class="preview-panel" id="previewPanel">
+                <div class="panel-header">
+                    <h3><i class="fas fa-eye"></i> Preview</h3>
+                    <div class="panel-actions">
+                        <button class="panel-btn" id="printBtn" title="Print">
+                            <i class="fas fa-print"></i>
+                        </button>
+                        <button class="panel-btn" id="fullscreenBtn" title="Fullscreen">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="panel-content">
+                    <div class="preview-container" id="previewContainer">
+                        <!-- Preview content will be generated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <!-- References Panel -->
+                <div class="sidebar-section">
+                    <div class="sidebar-header">
+                        <h4><i class="fas fa-book"></i> References</h4>
+                        <button class="sidebar-btn" id="addRefBtn">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar-content">
+                        <div class="references-list" id="referencesList">
+                            <!-- References will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tasks Panel -->
+                <div class="sidebar-section">
+                    <div class="sidebar-header">
+                        <h4><i class="fas fa-tasks"></i> Related Tasks</h4>
+                        <button class="sidebar-btn" id="refreshTasksBtn">
+                            <i class="fas fa-sync"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar-content">
+                        <div class="tasks-list" id="tasksList">
+                            <!-- Tasks will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notes Panel -->
+                <div class="sidebar-section">
+                    <div class="sidebar-header">
+                        <h4><i class="fas fa-sticky-note"></i> Notes</h4>
+                        <button class="sidebar-btn" id="addNoteBtn">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar-content">
+                        <textarea class="notes-editor" id="notesEditor" placeholder="Add notes for this section..."></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Report Statistics -->
+        <div class="report-stats">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-font"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="totalWords">0</h3>
+                    <p>Total Words</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-file"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="estimatedPages">0</h3>
+                    <p>Estimated Pages</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="sectionsComplete">0/9</h3>
+                    <p>Sections Complete</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="timeSpent">0h</h3>
+                    <p>Time Spent</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modals -->
+    <div class="modal" id="citationModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-quote-right"></i> Insert Citation</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="citation-search">
+                    <input type="text" id="citationSearch" placeholder="Search references...">
+                    <button class="search-btn"><i class="fas fa-search"></i></button>
+                </div>
+                <div class="citation-list" id="citationList">
+                    <!-- Citations will be loaded here -->
+                </div>
+                <div class="modal-actions">
+                    <button class="btn secondary close-modal">Cancel</button>
+                    <button class="btn primary" id="insertCitation">Insert Selected</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="equationModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-square-root-alt"></i> Insert Equation</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="equation-preview">
+                    <div id="equationPreview">Preview will appear here</div>
+                </div>
+                <div class="equation-editor">
+                    <textarea id="equationInput" placeholder="Enter LaTeX equation, e.g.: \Delta G = \Delta H - T\Delta S">\Delta G = \Delta H - T\Delta S</textarea>
+                </div>
+                <div class="equation-templates">
+                    <h4>Common Equations</h4>
+                    <div class="template-grid">
+                        <button class="template-btn" data-eq="\Delta G = \Delta H - T\Delta S">Gibbs Free Energy</button>
+                        <button class="template-btn" data-eq="E = \frac{1}{2}CV^2">Capacitor Energy</button>
+                        <button class="template-btn" data-eq="Q = I \times t">Charge</button>
+                        <button class="template-btn" data-eq="\eta = \frac{E_{out}}{E_{in}}">Efficiency</button>
+                        <button class="template-btn" data-eq="C = \frac{Q}{V}">Capacitance</button>
+                        <button class="template-btn" data-eq="E = \frac{F}{q}">Electric Field</button>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn secondary close-modal">Cancel</button>
+                    <button class="btn primary" id="insertEquation">Insert Equation</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="formatHelpModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-question-circle"></i> Markdown Formatting Guide</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="formatting-guide">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>What you type</th>
+                                <th>What you get</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code># Heading 1</code></td>
+                                <td><h1 style="margin:0;font-size:1.5rem;">Heading 1</h1></td>
+                            </tr>
+                            <tr>
+                                <td><code>## Heading 2</code></td>
+                                <td><h2 style="margin:0;font-size:1.3rem;">Heading 2</h2></td>
+                            </tr>
+                            <tr>
+                                <td><code>**bold text**</code></td>
+                                <td><strong>bold text</strong></td>
+                            </tr>
+                            <tr>
+                                <td><code>*italic text*</code></td>
+                                <td><em>italic text</em></td>
+                            </tr>
+                            <tr>
+                                <td><code>- Bullet point</code></td>
+                                <td>• Bullet point</td>
+                            </tr>
+                            <tr>
+                                <td><code>1. Numbered</code></td>
+                                <td>1. Numbered</td>
+                            </tr>
+                            <tr>
+                                <td><code>[Link text](url)</code></td>
+                                <td><a href="#">Link text</a></td>
+                            </tr>
+                            <tr>
+                                <td><code>> Quote</code></td>
+                                <td><blockquote style="margin:0;padding-left:10px;border-left:3px solid #ccc;">Quote</blockquote></td>
+                            </tr>
+                            <tr>
+                                <td><code>`code`</code></td>
+                                <td><code>code</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>$$E = mc^2$$</code></td>
+                                <td>E = mc² (LaTeX equation)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn primary close-modal">Got it!</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+      // Report Editor JavaScript
+
+// Report Configuration
+const REPORT_CONFIG = {
+    sections: {
+        'introduction': {
+            title: '1. Introduction',
+            template: `# 1. Introduction
+
+## 1.1 Problem Definition
+
+The wicked problem of **Critical Raw Materials and Batteries** represents a complex challenge at the intersection of materials science, geopolitics, environmental sustainability, and economic development. Current battery technologies, particularly lithium-ion batteries, rely heavily on critical raw materials such as lithium, cobalt, nickel, and graphite, whose supply chains are characterized by:
+
+- **Geopolitical concentration**: Over 60% of cobalt production originates from the Democratic Republic of Congo
+- **Environmental impact**: Energy-intensive extraction processes with significant carbon footprints
+- **Economic vulnerability**: Price volatility and supply chain disruptions
+- **Social implications**: Ethical concerns regarding mining practices and labor conditions
+
+This report proposes a strategy for developing battery technologies that are both **low-carbon** and **geopolitically sustainable**, addressing the multi-dimensional challenges of this wicked problem.`
+        },
+        'scientific-background': {
+            title: '2. Scientific Background',
+            template: `# 2. Scientific Background
+
+## 2.1 Electrochemical Principles
+
+Battery operation is governed by fundamental electrochemical principles:
+
+### Redox Chemistry
+The energy storage mechanism in batteries relies on redox (reduction-oxidation) reactions:
+
+$$
+\\text{Cathode: } \\text{Li}_x\\text{CoO}_2 \\rightleftharpoons \\text{Li}_{x-1}\\text{CoO}_2 + \\text{Li}^+ + e^-
+$$
+
+$$
+\\text{Anode: } 6\\text{C} + \\text{Li}^+ + e^- \\rightleftharpoons \\text{LiC}_6
+$$
+
+### Thermodynamic Considerations
+The Gibbs free energy ($\\Delta G$) determines the theoretical voltage:
+
+$$
+\\Delta G = -nFE
+$$
+
+Where $n$ is the number of electrons transferred, $F$ is Faraday's constant, and $E$ is the cell voltage.
+
+## 2.2 Critical Materials Chemistry
+
+### Lithium (Li)
+- **Role**: Charge carrier in electrolytes
+- **Properties**: Low atomic weight (6.94 g/mol), high electrochemical potential (-3.04 V vs. SHE)
+- **Challenges**: Limited global reserves (21 million metric tons), energy-intensive extraction
+
+### Cobalt (Co)
+- **Role**: Cathode stabilizer in NMC and NCA batteries
+- **Properties**: Enhances structural stability and cycle life
+- **Challenges**: Geopolitical concentration, price volatility, ethical mining concerns
+
+### Nickel (Ni) and Manganese (Mn)
+- **Role**: Primary redox-active components in NMC cathodes
+- **Balance**: Ni increases energy density, Mn enhances stability and safety`
+        },
+        'current-solutions': {
+            title: '3. Current Solutions and Limitations',
+            template: `# 3. Current Solutions and Limitations
+
+## 3.1 Dominant Battery Chemistries
+
+| Chemistry | Energy Density (Wh/kg) | Cycle Life | Critical Materials | Advantages | Limitations |
+|-----------|------------------------|------------|-------------------|------------|-------------|
+| **NMC** | 220-250 | 1000-2000 | Co, Ni, Mn, Li | High energy density, good power | Co dependency, thermal runaway risk |
+| **LFP** | 150-160 | 2000-3000 | Li, P, Fe | Excellent safety, long life | Lower energy density, Li dependency |
+| **NCA** | 260-280 | 500-1000 | Ni, Co, Al, Li | Highest energy density | Safety concerns, Co dependency |
+| **LCO** | 180-200 | 500-800 | Co, Li | Mature technology | Poor safety, high Co content |
+
+## 3.2 Supply Chain Analysis
+
+### Material Dependency Index
+Based on USGS data and criticality assessments:
+
+1. **Cobalt**: 7.2/10 (Extreme risk)
+   - 70% from DRC
+   - 15% refined in China
+   - 20% price volatility annually
+
+2. **Lithium**: 6.8/10 (High risk)
+   - 58% from Australia, Chile, China
+   - Demand growth: 25% CAGR (2020-2030)
+
+3. **Graphite**: 5.5/10 (Moderate risk)
+   - 65% from China
+   - Limited natural alternatives`
+        },
+        'chemical-analysis': {
+            title: '4. Quantitative Chemical Analysis',
+            template: `# 4. Quantitative Chemical Analysis
+
+## 4.1 Theoretical Capacity Calculations
+
+### NMC 811 Cathode
+Theoretical capacity based on reaction stoichiometry:
+
+$$
+C_{th} = \\frac{nF}{3.6M}
+$$
+
+Where:
+- $n$ = 1 (for Li⁺ intercalation)
+- $F$ = 96485 C/mol (Faraday constant)
+- $M$ = 97.46 g/mol (molar mass of LiNi₀.₈Mn₀.₁Co₀.₁O₂)
+
+$$
+C_{th} = \\frac{1 \\times 96485}{3.6 \\times 97.46} \\approx 275 \\text{ mAh/g}
+$$
+
+### Comparison with Commercial Values
+- **Theoretical**: 275 mAh/g
+- **Achieved**: 200-220 mAh/g
+- **Efficiency**: 73-80% of theoretical capacity
+
+## 4.2 Energy Density Analysis
+
+For NMC 811 vs LFP:
+
+| Parameter | NMC 811 | LFP | Units |
+|-----------|---------|-----|-------|
+| Voltage | 3.7 | 3.2 | V |
+| Capacity | 220 | 160 | mAh/g |
+| Energy Density | 814 | 512 | Wh/kg |
+| Material Mass per kWh | 1.23 | 1.95 | kg/kWh |
+
+The NMC 811 provides approximately 59% higher energy density but requires 58% more critical materials per kWh.`
+        },
+        'proposed-strategies': {
+            title: '5. Proposed Strategies',
+            template: `# 5. Proposed Strategies
+
+## 5.1 Low-Carbon Chemistry Pathways
+
+### Sodium-ion Batteries
+**Chemical Advantages:**
+- Abundant sodium resources (2.36% of Earth's crust vs 0.002% for Li)
+- Lower extraction energy: 4.5 kWh/kg vs 15 kWh/kg for Li
+- Similar intercalation chemistry to Li-ion
+
+**Technical Status:**
+- Energy density: 120-160 Wh/kg (comparable to early Li-ion)
+- Cycle life: 1000+ cycles demonstrated
+- Commercial readiness: 2-3 years
+
+### Aqueous Zinc Batteries
+**Sustainability Advantages:**
+- Non-toxic, non-flammable aqueous electrolyte
+- Zinc abundance: 0.0075% of crust, well-distributed globally
+- High theoretical capacity: 820 mAh/g for Zn metal
+
+**Challenges:**
+- Dendrite formation at anode
+- Lower voltage window (~1.8 V)
+- Hydrogen evolution side reactions
+
+## 5.2 Circular Material Pathways
+
+### Advanced Hydrometallurgical Recycling
+Proposed recovery efficiency targets:
+
+| Material | Current Recovery | Target Recovery | Improvement |
+|----------|------------------|-----------------|-------------|
+| Li | 50% | 95% | +90% |
+| Co | 95% | 99% | +4% |
+| Ni | 90% | 98% | +9% |
+| Mn | 80% | 95% | +19% |
+
+### Direct Cathode Regeneration
+Emerging process that avoids complete decomposition:
+
+$$
+\\text{Spent NMC} \\xrightarrow{\\text{Lithiation}} \\text{Regenerated NMC}
+$$
+
+Energy savings: 40-60% compared to conventional recycling`
+        },
+        'evaluation': {
+            title: '6. Environmental, Economic & Societal Evaluation',
+            template: `# 6. Environmental, Economic & Societal Evaluation
+
+## 6.1 Life Cycle Assessment
+
+### Carbon Footprint Comparison
+Based on cradle-to-gate analysis (kg CO₂eq/kWh):
+
+| Battery Type | Production | Use Phase (100k km) | Total | Reduction vs NMC |
+|--------------|------------|---------------------|-------|------------------|
+| **NMC 811** | 85 | 0 | 85 | Baseline |
+| **LFP** | 70 | 0 | 70 | -18% |
+| **Na-ion** | 45 | 0 | 45 | -47% |
+| **Zn-ion** | 40 | 0 | 40 | -53% |
+
+*Note: Use phase assumes renewable energy charging*
+
+### Water Consumption
+Critical raw material extraction water intensity:
+
+- **Lithium (brine)**: 500,000 L/ton Li
+- **Cobalt (sulfide)**: 15,000 L/ton Co
+- **Nickel (laterite)**: 200,000 L/ton Ni
+
+## 6.2 Economic Analysis
+
+### Levelized Cost of Storage (LCOS)
+Projections for 2030 ($/kWh over lifetime):
+
+| Technology | Capital Cost | Cycle Life | LCOS | Notes |
+|------------|--------------|------------|------|-------|
+| **NMC 811** | $75 | 1500 | $0.12 | Current benchmark |
+| **LFP** | $65 | 3000 | $0.08 | Cost leader |
+| **Na-ion** | $50 | 2000 | $0.07 | Potential disruptor |
+| **Zn-ion** | $45 | 1000 | $0.10 | Early stage |
+
+## 6.3 Societal and Geopolitical Implications
+
+### Supply Chain Diversification Index
+Moving from concentrated to diversified supply:
+
+| Material | Current HHI* | Target HHI | Risk Reduction |
+|----------|--------------|------------|----------------|
+| **Cobalt** | 4200 | <1500 | 64% |
+| **Lithium** | 2800 | <1500 | 46% |
+| **Graphite** | 3200 | <1500 | 53% |
+
+*Herfindahl-Hirschman Index (0-10,000, higher = more concentrated)`
+        },
+        'trade-offs': {
+            title: '7. Key Trade-offs',
+            template: `# 7. Key Trade-offs
+
+## 7.1 Performance vs. Sustainability Trade-off
+
+### The Energy Density Compromise
+Alternative chemistries typically offer lower energy density:
+
+| Strategy | Sustainability Benefit | Performance Trade-off | Mitigation Approach |
+|----------|-----------------------|----------------------|---------------------|
+| **Na-ion batteries** | Abundant materials, lower cost | 30-40% lower energy density | System-level optimization, lighter packaging |
+| **LFP batteries** | No Co, excellent safety | 35% lower energy density | Higher packing efficiency, better thermal management |
+| **Solid-state** | Safer, higher voltage | Manufacturing complexity, cost | Scalable production methods |
+| **Recycling focus** | Resource conservation | Energy penalty for processing | Renewable energy integration |
+
+## 7.2 Technological Readiness vs. Impact
+
+Emerging technologies face adoption barriers:
+
+| Technology | TRL* | Potential Impact | Main Barriers |
+|------------|------|------------------|---------------|
+| **Na-ion** | 7-8 | High | Manufacturing scale-up |
+| **Zn-ion** | 5-6 | Medium-high | Cycle life improvement |
+| **Direct recycling** | 4-5 | High | Collection infrastructure |
+| **Solid-state** | 6-7 | Very high | Interface stability |
+
+*Technology Readiness Level (1-9)*
+
+## 7.3 Economic Considerations
+
+### Short-term vs. Long-term Costs
+Transitioning from established to emerging technologies involves:
+
+**Short-term costs:**
+- R&D investment: $2-5 billion industry-wide
+- Manufacturing retooling: 20-30% capital cost premium
+- Supply chain reconfiguration: 3-5 year transition period
+
+**Long-term benefits:**
+- Raw material cost stability: 30-50% reduction in volatility
+- Energy security: Reduced import dependency
+- Environmental compliance: Avoided carbon taxes and penalties`
+        },
+        'conclusion': {
+            title: '8. Conclusion',
+            template: `# 8. Conclusion
+
+## 8.1 Summary of Findings
+
+This analysis of the wicked problem surrounding critical raw materials and batteries reveals several key insights:
+
+1. **The status quo is unsustainable**: Current lithium-ion battery technologies, while high-performing, create unacceptable geopolitical, environmental, and ethical risks through their dependence on concentrated supply chains for cobalt, lithium, and other critical materials.
+
+2. **Multiple pathways exist**: Alternative chemistries (Na-ion, Zn-ion), material innovations (LFP, silicon anodes), and circular economy approaches (advanced recycling) each offer partial solutions to different aspects of the problem.
+
+3. **No single solution**: The complexity of the wicked problem necessitates a portfolio approach combining technological innovation, supply chain diversification, policy intervention, and circular economy principles.
+
+## 8.2 Recommended Strategy
+
+A three-pronged strategy is proposed:
+
+### Phase 1 (2025-2030): Diversification and Optimization
+- Accelerate LFP adoption for stationary storage and entry-level EVs
+- Invest in Na-ion scaling for grid storage applications
+- Implement design-for-recycling standards
+
+### Phase 2 (2030-2035): Transition and Scaling
+- Deploy solid-state batteries for premium applications
+- Scale advanced recycling to >90% recovery rates
+- Establish regional battery material supply chains
+
+### Phase 3 (2035-2040): Maturation and Integration
+- Achieve cost parity for sustainable alternatives
+- Establish circular material ecosystems
+- Integrate with renewable energy systems
+
+## 8.3 Final Reflections
+
+The transition to sustainable battery technologies represents not just a technical challenge, but a complex socio-technical system transformation. Success will require coordinated action across industry, government, and research institutions, with particular attention to:
+
+- **Just transitions** for communities dependent on current mining
+- **International cooperation** on material standards and trade
+- **Continuous innovation** in both chemistry and manufacturing
+- **Holistic life-cycle thinking** from extraction to end-of-life
+
+The proposed strategy offers a pathway toward battery technologies that are not only high-performing and cost-effective, but also geopolitically resilient, environmentally sustainable, and socially responsible.`
+        },
+        'references': {
+            title: '9. References',
+            template: `# 9. References
+
+## ACS Style References
+
+(1) Liu, C.; Li, Q.; Wang, K. State-of-Charge Estimation and Remaining Useful Life Prediction of Supercapacitors. *Renew. Sustain. Energy Rev.* **2021**, *138*, 110483.
+
+(2) Harper, G.; Sommerville, R.; Kendrick, E.; Driscoll, L.; Slater, P.; Stolkin, R.; Walton, A.; Christensen, P.; Heidrich, O.; Lambert, S.; et al. Recycling Lithium-Ion Batteries from Electric Vehicles. *Nature* **2019**, *575*, 75–86.
+
+(3) Zubi, G.; Dufo-López, R.; Carvalho, M.; Pasaoglu, G. The Lithium-Ion Battery: State of the Art and Future Perspectives. *Renew. Sustain. Energy Rev.* **2018**, *89*, 292–308.
+
+(4) Peters, J. F.; Baumann, M.; Zimmermann, B.; Braun, J.; Weil, M. The Environmental Impact of Li-Ion Batteries and the Role of Key Parameters – A Review. *Renew. Sustain. Energy Rev.* **2017**, *67*, 491–506.
+
+(5) Olivetti, E. A.; Ceder, G.; Gaustad, G. G.; Fu, X. Lithium-Ion Battery Supply Chain Considerations: Analysis of Potential Bottlenecks in Critical Metals. *Joule* **2017**, *1*, 229–243.
+
+(6) Miao, Y.; Hynan, P.; von Jouanne, A.; Yokochi, A. Current Li-Ion Battery Technologies in Electric Vehicles and Opportunities for Advancements. *Energies* **2019**, *12*, 1074.
+
+(7) Hossain, E.; Murtaugh, D.; Mody, J.; Faruque, H. M. R.; Sunny, M. S. H.; Mohammad, N. A Comprehensive Review on Second-Life Batteries: Current State, Manufacturing Considerations, Applications, Impacts, Barriers & Potential Solutions, Business Strategies, and Policies. *IEEE Access* **2019**, *7*, 73215–73252.
+
+(8) Sun, P.; Bisschop, R.; Niu, H.; Huang, X. A Review of Battery Fires in Electric Vehicles. *Fire Technol.* **2020**, *56*, 1361–1410.
+
+(9) Grey, C. P.; Hall, D. S. Prospects for Lithium-Ion Batteries and Beyond—A 2030 Vision. *Nat. Commun.* **2020**, *11*, 6279.
+
+(10) Li, M.; Lu, J.; Chen, Z.; Amine, K. 30 Years of Lithium-Ion Batteries. *Adv. Mater.* **2018**, *30*, 1800561.
+
+(11) Duffner, F.; Kronemeyer, N.; Tübke, J.; Leker, J.; Winter, M.; Schmuch, R. Post-Lithium-Ion Battery Cell Production and Its Compatibility with Lithium-Ion Cell Production Infrastructure. *Nat. Energy* **2021**, *6*, 123–134.
+
+(12) Li, W.; Erickson, E. M.; Manthiram, A. High-Nickel Layered Oxide Cathodes for Lithium-Based Automotive Batteries. *Nat. Energy* **2020**, *5*, 26–34.
+
+(13) Masias, A.; Marcicki, J.; Paxton, W. A. Opportunities and Challenges of Lithium Ion Batteries in Automotive Applications. *ACS Energy Lett.* **2021**, *6*, 621–630.
+
+(14) Pistoia, G.; Liaw, B. *Behaviour of Lithium-Ion Batteries in Electric Vehicles: Battery Health, Performance, Safety, and Cost*; Springer: Cham, Switzerland, 2018.
+
+(15) European Commission. *Study on the Critical Raw Materials for the EU 2020: Final Report*; Publications Office of the European Union: Luxembourg, 2020.`
+        }
+    },
+    references: [
+        {
+            id: 1,
+            citation: "Liu, C.; Li, Q.; Wang, K. State-of-Charge Estimation and Remaining Useful Life Prediction of Supercapacitors. *Renew. Sustain. Energy Rev.* **2021**, *138*, 110483.",
+            author: "Liu et al.",
+            year: "2021"
+        },
+        {
+            id: 2,
+            citation: "Harper, G.; Sommerville, R.; Kendrick, E.; Driscoll, L.; Slater, P.; Stolkin, R.; et al. Recycling Lithium-Ion Batteries from Electric Vehicles. *Nature* **2019**, *575*, 75–86.",
+            author: "Harper et al.",
+            year: "2019"
+        },
+        {
+            id: 3,
+            citation: "Zubi, G.; Dufo-López, R.; Carvalho, M.; Pasaoglu, G. The Lithium-Ion Battery: State of the Art and Future Perspectives. *Renew. Sustain. Energy Rev.* **2018**, *89*, 292–308.",
+            author: "Zubi et al.",
+            year: "2018"
+        },
+        {
+            id: 4,
+            citation: "Peters, J. F.; Baumann, M.; Zimmermann, B.; Braun, J.; Weil, M. The Environmental Impact of Li-Ion Batteries and the Role of Key Parameters – A Review. *Renew. Sustain. Energy Rev.* **2017**, *67*, 491–506.",
+            author: "Peters et al.",
+            year: "2017"
+        }
+    ]
+};
+
+// Report Editor State
+let currentSection = 'introduction';
+let lastSaveTime = new Date();
+let wordCount = 0;
+let editingTime = 0;
+let editingTimer = null;
+
+// Initialize Report Editor
+document.addEventListener('DOMContentLoaded', function() {
+    initializeReportEditor();
+    setupEventListeners();
+    loadReportData();
+    startEditingTimer();
+});
+
+// Initialize the editor
+function initializeReportEditor() {
+    // Set up marked.js for Markdown rendering
+    marked.setOptions({
+        breaks: true,
+        gfm: true,
+        headerIds: true,
+        highlight: function(code, lang) {
+            return code;
+        }
+    });
+    
+    // Load initial section
+    loadSection(currentSection);
+    
+    // Initialize preview
+    updatePreview();
+    
+    // Load references
+    loadReferences();
+    
+    // Load related tasks
+    loadRelatedTasks();
+    
+    // Update word count
+    updateWordCount();
+    
+    // Start auto-save interval
+    setInterval(autoSave, 30000); // Auto-save every 30 seconds
+}
+
+// Setup event listeners
+function setupEventListeners() {
+    // Section selector
+    document.getElementById('sectionSelector').addEventListener('change', function() {
+        currentSection = this.value;
+        loadSection(currentSection);
+    });
+    
+    // Editor input
+    const editor = document.getElementById('reportEditor');
+    editor.addEventListener('input', function() {
+        updatePreview();
+        updateWordCount();
+        updateLastSaved();
+    });
+    
+    // Control buttons
+    document.getElementById('toggleViewBtn').addEventListener('click', toggleView);
+    document.getElementById('wordCountBtn').addEventListener('click', showWordCountDetails);
+    document.getElementById('insertCitationBtn').addEventListener('click', showCitationModal);
+    document.getElementById('insertEquationBtn').addEventListener('click', showEquationModal);
+    document.getElementById('exportBtn').addEventListener('click', exportReport);
+    document.getElementById('saveBtn').addEventListener('click', saveReport);
+    document.getElementById('previewBtn').addEventListener('click', togglePreview);
+    
+    // Panel buttons
+    document.getElementById('formatHelpBtn').addEventListener('click', showFormatHelp);
+    document.getElementById('clearBtn').addEventListener('click', clearEditor);
+    document.getElementById('printBtn').addEventListener('click', printReport);
+    document.getElementById('fullscreenBtn').addEventListener('click', toggleFullscreen);
+    
+    // Sidebar buttons
+    document.getElementById('addSectionBtn').addEventListener('click', addNewSection);
+    document.getElementById('addRefBtn').addEventListener('click', addNewReference);
+    document.getElementById('refreshTasksBtn').addEventListener('click', loadRelatedTasks);
+    document.getElementById('addNoteBtn').addEventListener('click', addNewNote);
+    
+    // Toolbar buttons
+    document.querySelectorAll('.toolbar-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const format = this.getAttribute('data-format');
+            if (format) {
+                applyFormatting(format);
+            }
+        });
+    });
+    
+    document.getElementById('insertTableBtn').addEventListener('click', insertTable);
+    document.getElementById('insertFigureBtn').addEventListener('click', insertFigure);
+    
+    // Modal close buttons
+    document.querySelectorAll('.close-modal').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.classList.remove('active');
+            });
+        });
+    });
+    
+    // Modal background click
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('active');
+            }
+        });
+    });
+    
+    // Equation templates
+    document.querySelectorAll('.template-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const equation = this.getAttribute('data-eq');
+            document.getElementById('equationInput').value = equation;
+            updateEquationPreview();
+        });
+    });
+    
+    // Equation input
+    document.getElementById('equationInput').addEventListener('input', updateEquationPreview);
+    
+    // Insert equation button
+    document.getElementById('insertEquation').addEventListener('click', insertEquation);
+    
+    // Insert citation button
+    document.getElementById('insertCitation').addEventListener('click', insertSelectedCitation);
+    
+    // Citation search
+    document.getElementById('citationSearch').addEventListener('input', filterReferences);
+}
+
+// Load section content
+function loadSection(sectionId) {
+    const editor = document.getElementById('reportEditor');
+    const sectionData = getSectionData(sectionId);
+    
+    editor.value = sectionData.content;
+    updatePreview();
+    updateWordCount();
+    updateSectionStats();
+    
+    // Update section selector
+    document.getElementById('sectionSelector').value = sectionId;
+    
+    // Load section notes
+    loadSectionNotes(sectionId);
+}
+
+// Get section data from localStorage or template
+function getSectionData(sectionId) {
+    const savedData = localStorage.getItem(`reportSection_${sectionId}`);
+    
+    if (savedData) {
+        return JSON.parse(savedData);
+    } else {
+        return {
+            content: REPORT_CONFIG.sections[sectionId]?.template || '',
+            lastModified: new Date().toISOString(),
+            wordCount: 0
+        };
+    }
+}
+
+// Update preview panel
+function updatePreview() {
+    const editor = document.getElementById('reportEditor');
+    const previewContainer = document.getElementById('previewContainer');
+    
+    const markdown = editor.value;
+    const html = marked.parse(markdown);
+    
+    // Process equations (simple LaTeX support)
+    const processedHtml = html.replace(/\$\$(.*?)\$\$/g, '<div class="equation">$1</div>')
+                             .replace(/\$(.*?)\$/g, '<span class="inline-equation">$1</span>');
+    
+    previewContainer.innerHTML = `
+        <div class="preview-content">
+            ${processedHtml}
+        </div>
+    `;
+}
+
+// Update word count
+function updateWordCount() {
+    const editor = document.getElementById('reportEditor');
+    const text = editor.value;
+    
+    // Simple word count (can be improved)
+    const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+    wordCount = words.length;
+    
+    // Update display
+    document.getElementById('wordCount').textContent = wordCount;
+    document.getElementById('totalWords').textContent = wordCount.toLocaleString();
+    
+    // Estimate pages (assuming 500 words per page)
+    const estimatedPages = Math.ceil(wordCount / 500);
+    document.getElementById('estimatedPages').textContent = estimatedPages;
+    
+    return wordCount;
+}
+
+// Update last saved time
+function updateLastSaved() {
+    const now = new Date();
+    const diff = Math.floor((now - lastSaveTime) / 1000); // seconds
+    
+    let displayText;
+    if (diff < 60) {
+        displayText = 'Just now';
+    } else if (diff < 3600) {
+        const minutes = Math.floor(diff / 60);
+        displayText = `${minutes}m ago`;
+    } else if (diff < 86400) {
+        const hours = Math.floor(diff / 3600);
+        displayText = `${hours}h ago`;
+    } else {
+        const days = Math.floor(diff / 86400);
+        displayText = `${days}d ago`;
+    }
+    
+    document.getElementById('lastSaved').textContent = displayText;
+}
+
+// Update section completion stats
+function updateSectionStats() {
+    const sections = Object.keys(REPORT_CONFIG.sections);
+    let completedSections = 0;
+    
+    sections.forEach(sectionId => {
+        const data = getSectionData(sectionId);
+        const words = data.content.trim().split(/\s+/).filter(word => word.length > 0).length;
+        if (words > 100) { // Consider a section complete if it has >100 words
+            completedSections++;
+        }
+    });
+    
+    document.getElementById('sectionsComplete').textContent = `${completedSections}/${sections.length}`;
+}
+
+// Load references
+function loadReferences() {
+    const referencesList = document.getElementById('referencesList');
+    const citationList = document.getElementById('citationList');
+    
+    // Get saved references or use default
+    const savedRefs = localStorage.getItem('reportReferences');
+    const references = savedRefs ? JSON.parse(savedRefs) : REPORT_CONFIG.references;
+    
+    // Update references list in sidebar
+    let refsHTML = '';
+    references.forEach(ref => {
+        refsHTML += `
+            <div class="reference-item" data-id="${ref.id}">
+                <div class="reference-citation">[${ref.id}] ${ref.citation.substring(0, 120)}...</div>
+                <div class="reference-author">${ref.author} (${ref.year})</div>
+            </div>
+        `;
+    });
+    referencesList.innerHTML = refsHTML;
+    
+    // Update citation modal list
+    let citationHTML = '';
+    references.forEach(ref => {
+        citationHTML += `
+            <div class="reference-item" data-id="${ref.id}">
+                <div class="reference-citation">${ref.citation}</div>
+                <div class="reference-author">${ref.author} (${ref.year})</div>
+            </div>
+        `;
+    });
+    citationList.innerHTML = citationHTML;
+    
+    // Add click handlers for references
+    document.querySelectorAll('.reference-item').forEach(item => {
+        item.addEventListener('click', function() {
+            document.querySelectorAll('.reference-item').forEach(i => i.classList.remove('selected'));
+            this.classList.add('selected');
+        });
+    });
+}
+
+// Load related tasks
+function loadRelatedTasks() {
+    const tasksList = document.getElementById('tasksList');
+    
+    // Get tasks from localStorage
+    const savedTasks = localStorage.getItem('projectVoltaTasks');
+    const tasks = savedTasks ? JSON.parse(savedTasks) : [];
+    
+    // Filter tasks related to report writing
+    const reportTasks = tasks.filter(task => 
+        task.name.toLowerCase().includes('report') || 
+        task.name.toLowerCase().includes('write') ||
+        task.deliverable?.toLowerCase().includes('report') ||
+        task.phase === 'IV' // Finalization phase
+    ).slice(0, 3); // Show only 3 tasks
+    
+    if (reportTasks.length === 0) {
+        tasksList.innerHTML = `
+            <div class="empty-state" style="padding: 1rem; text-align: center; color: var(--gray-color);">
+                <i class="fas fa-tasks" style="font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.3;"></i>
+                <p style="font-size: 0.9rem;">No related tasks found</p>
+            </div>
+        `;
+        return;
+    }
+    
+    let tasksHTML = '';
+    reportTasks.forEach(task => {
+        const dueDate = new Date(task.dueDate);
+        const formattedDate = dueDate.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric'
+        });
+        
+        tasksHTML += `
+            <div class="sidebar-task">
+                <div class="task-title">${task.name}</div>
+                <div class="task-phase">
+                    <i class="fas fa-layer-group"></i>
+                    Phase ${task.phase} • Due: ${formattedDate}
+                </div>
+            </div>
+        `;
+    });
+    
+    tasksList.innerHTML = tasksHTML;
+}
+
+// Load section notes
+function loadSectionNotes(sectionId) {
+    const notes = localStorage.getItem(`reportNotes_${sectionId}`) || '';
+    document.getElementById('notesEditor').value = notes;
+}
+
+// Start editing timer
+function startEditingTimer() {
+    editingTimer = setInterval(() => {
+        editingTime += 1; // Increment by 1 minute
+        updateTimeSpent();
+    }, 60000); // Update every minute
+}
+
+// Update time spent display
+function updateTimeSpent() {
+    const hours = Math.floor(editingTime / 60);
+    const minutes = editingTime % 60;
+    
+    let displayText;
+    if (hours > 0) {
+        displayText = `${hours}h ${minutes}m`;
+    } else {
+        displayText = `${minutes}m`;
+    }
+    
+    document.getElementById('timeSpent').textContent = displayText;
+}
+
+// Auto-save function
+function autoSave() {
+    saveCurrentSection();
+    lastSaveTime = new Date();
+    updateLastSaved();
+    showNotification('Report auto-saved', 'success');
+}
+
+// Save current section
+function saveCurrentSection() {
+    const editor = document.getElementById('reportEditor');
+    const content = editor.value;
+    
+    const sectionData = {
+        content: content,
+        lastModified: new Date().toISOString(),
+        wordCount: updateWordCount()
+    };
+    
+    localStorage.setItem(`reportSection_${currentSection}`, JSON.stringify(sectionData));
+    
+    // Update section stats
+    updateSectionStats();
+}
+
+// Save entire report
+function saveReport() {
+    saveCurrentSection();
+    lastSaveTime = new Date();
+    
+    // Save notes
+    const notes = document.getElementById('notesEditor').value;
+    localStorage.setItem(`reportNotes_${currentSection}`, notes);
+    
+    showNotification('Report saved successfully!', 'success');
+}
+
+// Load report data
+function loadReportData() {
+    // Load saved editing time
+    const savedTime = localStorage.getItem('reportEditingTime');
+    if (savedTime) {
+        editingTime = parseInt(savedTime);
+        updateTimeSpent();
+    }
+    
+    // Load last save time
+    const lastSave = localStorage.getItem('reportLastSave');
+    if (lastSave) {
+        lastSaveTime = new Date(lastSave);
+        updateLastSaved();
+    }
+}
+
+// Export report
+function exportReport() {
+    const reportData = {
+        title: 'Critical Raw Materials and Batteries - Wicked Problem Analysis',
+        author: 'Project Volta Researcher',
+        date: new Date().toISOString(),
+        sections: {},
+        statistics: {
+            totalWords: wordCount,
+            estimatedPages: Math.ceil(wordCount / 500),
+            editingTime: editingTime,
+            lastModified: new Date().toISOString()
+        }
+    };
+    
+    // Collect all sections
+    Object.keys(REPORT_CONFIG.sections).forEach(sectionId => {
+        const data = getSectionData(sectionId);
+        reportData.sections[sectionId] = {
+            title: REPORT_CONFIG.sections[sectionId].title,
+            content: data.content,
+            wordCount: data.content.trim().split(/\s+/).filter(word => word.length > 0).length
+        };
+    });
+    
+    // Create downloadable content
+    let markdownContent = `# ${reportData.title}\n\n`;
+    markdownContent += `**Author:** ${reportData.author}\n`;
+    markdownContent += `**Date:** ${new Date().toLocaleDateString()}\n`;
+    markdownContent += `**Total Words:** ${reportData.statistics.totalWords}\n\n`;
+    
+    Object.values(reportData.sections).forEach(section => {
+        markdownContent += `\n\n${section.content}\n`;
+    });
+    
+    // Create download
+    const blob = new Blob([markdownContent], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `project-volta-report-${new Date().toISOString().split('T')[0]}.md`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    showNotification('Report exported as Markdown', 'success');
+}
+
+// View control functions
+function toggleView() {
+    const container = document.querySelector('.report-container');
+    const btn = document.getElementById('toggleViewBtn');
+    
+    if (container.classList.contains('split-view')) {
+        container.classList.remove('split-view');
+        btn.innerHTML = '<i class="fas fa-columns"></i><span>Split View</span>';
+    } else {
+        container.classList.add('split-view');
+        btn.innerHTML = '<i class="fas fa-file-alt"></i><span>Editor Only</span>';
+    }
+}
+
+function togglePreview() {
+    const container = document.querySelector('.report-container');
+    const btn = document.getElementById('previewBtn');
+    
+    if (container.classList.contains('preview-only')) {
+        container.classList.remove('preview-only');
+        btn.innerHTML = '<i class="fas fa-eye"></i><span>Preview</span>';
+    } else {
+        container.classList.add('preview-only');
+        btn.innerHTML = '<i class="fas fa-edit"></i><span>Edit</span>';
+    }
+}
+
+function toggleFullscreen() {
+    const previewPanel = document.getElementById('previewPanel');
+    
+    if (!document.fullscreenElement) {
+        previewPanel.requestFullscreen().catch(err => {
+            console.error(`Error attempting to enable fullscreen: ${err.message}`);
+        });
+    } else {
+        document.exitFullscreen();
+    }
+}
+
+// Formatting functions
+function applyFormatting(format) {
+    const editor = document.getElementById('reportEditor');
+    const start = editor.selectionStart;
+    const end = editor.selectionEnd;
+    const selectedText = editor.value.substring(start, end);
+    
+    let formattedText = '';
+    
+    switch(format) {
+        case 'bold':
+            formattedText = `**${selectedText}**`;
+            break;
+        case 'italic':
+            formattedText = `*${selectedText}*`;
+            break;
+        case 'heading1':
+            formattedText = `# ${selectedText}`;
+            break;
+        case 'heading2':
+            formattedText = `## ${selectedText}`;
+            break;
+        case 'bullets':
+            formattedText = selectedText.split('\n').map(line => `- ${line}`).join('\n');
+            break;
+        case 'numbers':
+            formattedText = selectedText.split('\n').map((line, i) => `${i + 1}. ${line}`).join('\n');
+            break;
+        case 'link':
+            formattedText = `[${selectedText}](url)`;
+            break;
+        case 'quote':
+            formattedText = selectedText.split('\n').map(line => `> ${line}`).join('\n');
+            break;
+    }
+    
+    // Insert formatted text
+    editor.value = editor.value.substring(0, start) + formattedText + editor.value.substring(end);
+    
+    // Restore selection
+    editor.selectionStart = start;
+    editor.selectionEnd = start + formattedText.length;
+    editor.focus();
+    
+    // Update preview
+    updatePreview();
+}
+
+function insertTable() {
+    const editor = document.getElementById('reportEditor');
+    const cursorPos = editor.selectionStart;
+    
+    const tableMarkdown = `| Column 1 | Column 2 | Column 3 |
+|----------|----------|----------|
+| Data 1   | Data 2   | Data 3   |
+| Data 4   | Data 5   | Data 6   |`;
+    
+    editor.value = editor.value.substring(0, cursorPos) + '\n\n' + tableMarkdown + '\n\n' + editor.value.substring(cursorPos);
+    editor.focus();
+    editor.selectionStart = cursorPos + tableMarkdown.length + 4;
+    editor.selectionEnd = cursorPos + tableMarkdown.length + 4;
+    
+    updatePreview();
+}
+
+function insertFigure() {
+    const editor = document.getElementById('reportEditor');
+    const cursorPos = editor.selectionStart;
+    
+    const figureMarkdown = `![Figure Caption](https://via.placeholder.com/600x300/3b82f6/ffffff?text=Battery+Chemistry+Diagram)`;
+    
+    editor.value = editor.value.substring(0, cursorPos) + '\n\n' + figureMarkdown + '\n\n' + editor.value.substring(cursorPos);
+    editor.focus();
+    editor.selectionStart = cursorPos + figureMarkdown.length + 4;
+    editor.selectionEnd = cursorPos + figureMarkdown.length + 4;
+    
+    updatePreview();
+}
+
+// Modal functions
+function showCitationModal() {
+    const modal = document.getElementById('citationModal');
+    modal.classList.add('active');
+}
+
+function showEquationModal() {
+    const modal = document.getElementById('equationModal');
+    modal.classList.add('active');
+    updateEquationPreview();
+}
+
+function showFormatHelp() {
+    const modal = document.getElementById('formatHelpModal');
+    modal.classList.add('active');
+}
+
+function showWordCountDetails() {
+    const editor = document.getElementById('reportEditor');
+    const text = editor.value;
+    
+    const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+    const characters = text.length;
+    const paragraphs = text.split('\n\n').filter(p => p.trim().length > 0).length;
+    const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0).length;
+    
+    alert(`Word Count Details:
+    • Words: ${words.length}
+    • Characters: ${characters}
+    • Paragraphs: ${paragraphs}
+    • Sentences: ${sentences}
+    • Estimated Pages: ${Math.ceil(words.length / 500)}`);
+}
+
+function updateEquationPreview() {
+    const input = document.getElementById('equationInput').value;
+    const preview = document.getElementById('equationPreview');
+    preview.textContent = input;
+}
+
+function insertEquation() {
+    const equation = document.getElementById('equationInput').value;
+    const editor = document.getElementById('reportEditor');
+    const cursorPos = editor.selectionStart;
+    
+    const equationMarkdown = `$$${equation}$$`;
+    
+    editor.value = editor.value.substring(0, cursorPos) + '\n\n' + equationMarkdown + '\n\n' + editor.value.substring(cursorPos);
+    editor.focus();
+    editor.selectionStart = cursorPos + equationMarkdown.length + 4;
+    editor.selectionEnd = cursorPos + equationMarkdown.length + 4;
+    
+    updatePreview();
+    
+    // Close modal
+    document.getElementById('equationModal').classList.remove('active');
+}
+
+function filterReferences() {
+    const searchTerm = document.getElementById('citationSearch').value.toLowerCase();
+    const items = document.querySelectorAll('#citationList .reference-item');
+    
+    items.forEach(item => {
+        const text = item.textContent.toLowerCase();
+        if (text.includes(searchTerm)) {
+            item.style.display = 'block';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+}
+
+function insertSelectedCitation() {
+    const selected = document.querySelector('#citationList .reference-item.selected');
+    if (!selected) {
+        alert('Please select a reference first');
+        return;
+    }
+    
+    const refId = selected.getAttribute('data-id');
+    const editor = document.getElementById('reportEditor');
+    const cursorPos = editor.selectionStart;
+    
+    const citationMarkdown = `[${refId}]`;
+    
+    editor.value = editor.value.substring(0, cursorPos) + citationMarkdown + editor.value.substring(cursorPos);
+    editor.focus();
+    editor.selectionStart = cursorPos + citationMarkdown.length;
+    editor.selectionEnd = cursorPos + citationMarkdown.length;
+    
+    updatePreview();
+    
+    // Close modal
+    document.getElementById('citationModal').classList.remove('active');
+}
+
+// Other functions
+function clearEditor() {
+    if (confirm('Are you sure you want to clear the current section? This cannot be undone.')) {
+        document.getElementById('reportEditor').value = '';
+        updatePreview();
+        updateWordCount();
+    }
+}
+
+function printReport() {
+    const printWindow = window.open('', '_blank');
+    const previewContent = document.getElementById('previewContainer').innerHTML;
+    
+    printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Project Volta Report</title>
+            <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; margin: 2cm; }
+                h1, h2, h3, h4 { color: #1f2937; }
+                h1 { border-bottom: 2px solid #2563eb; padding-bottom: 0.5rem; }
+                .equation { text-align: center; margin: 1em 0; padding: 1em; background: #f8fafc; }
+                table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+                th, td { border: 1px solid #e5e7eb; padding: 0.5em; }
+                th { background: #f8fafc; }
+            </style>
+        </head>
+        <body>
+            ${previewContent}
+        </body>
+        </html>
+    `);
+    
+    printWindow.document.close();
+    printWindow.print();
+}
+
+function addNewSection() {
+    const sectionName = prompt('Enter new section name:');
+    if (sectionName) {
+        const sectionId = sectionName.toLowerCase().replace(/\s+/g, '-');
+        
+        // Add to selector
+        const selector = document.getElementById('sectionSelector');
+        const option = document.createElement('option');
+        option.value = sectionId;
+        option.textContent = sectionName;
+        selector.appendChild(option);
+        
+        // Create template
+        REPORT_CONFIG.sections[sectionId] = {
+            title: sectionName,
+            template: `# ${sectionName}\n\nStart writing your ${sectionName.toLowerCase()} section here...`
+        };
+        
+        // Select new section
+        selector.value = sectionId;
+        currentSection = sectionId;
+        loadSection(sectionId);
+    }
+}
+
+function addNewReference() {
+    const author = prompt('Enter author name (e.g., Smith et al.):');
+    if (!author) return;
+    
+    const year = prompt('Enter publication year:');
+    if (!year) return;
+    
+    const citation = prompt('Enter full ACS citation:');
+    if (!citation) return;
+    
+    // Get existing references
+    const savedRefs = localStorage.getItem('reportReferences');
+    const references = savedRefs ? JSON.parse(savedRefs) : REPORT_CONFIG.references;
+    
+    // Add new reference
+    const newRef = {
+        id: references.length + 1,
+        citation: citation,
+        author: author,
+        year: year
+    };
+    
+    references.push(newRef);
+    localStorage.setItem('reportReferences', JSON.stringify(references));
+    
+    // Reload references
+    loadReferences();
+    
+    showNotification('Reference added successfully!', 'success');
+}
+
+function addNewNote() {
+    const note = prompt('Enter your note:');
+    if (note) {
+        const notesEditor = document.getElementById('notesEditor');
+        const currentNotes = notesEditor.value;
+        const timestamp = new Date().toLocaleString();
+        
+        notesEditor.value = currentNotes + `\n[${timestamp}] ${note}\n`;
+        
+        // Save note
+        localStorage.setItem(`reportNotes_${currentSection}`, notesEditor.value);
+        
+        showNotification('Note added!', 'success');
+    }
+}
+
+// Show notification
+function showNotification(message, type = 'info') {
+    // Remove existing notification
+    const existing = document.querySelector('.report-notification');
+    if (existing) existing.remove();
+    
+    // Create notification
+    const notification = document.createElement('div');
+    notification.className = `report-notification ${type}`;
+    notification.innerHTML = `
+        <div class="notification-content">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'}"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Add styles if needed
+    if (!document.querySelector('#report-notification-styles')) {
+        const style = document.createElement('style');
+        style.id = 'report-notification-styles';
+        style.textContent = `
+            .report-notification {
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background: white;
+                color: var(--dark-color);
+                padding: 1rem 1.5rem;
+                border-radius: 0.75rem;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+                z-index: 10000;
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                animation: slideInRight 0.3s ease;
+                border-left: 4px solid var(--primary-color);
+            }
+            
+            .report-notification.success {
+                border-left-color: #10b981;
+            }
+            
+            .report-notification i {
+                font-size: 1.25rem;
+            }
+            
+            .report-notification.success i {
+                color: #10b981;
+            }
+            
+            @keyframes slideInRight {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            
+            @keyframes slideOutRight {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        notification.style.animation = 'slideOutRight 0.3s ease forwards';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
+// Save data before unloading
+window.addEventListener('beforeunload', function(e) {
+    saveCurrentSection();
+    localStorage.setItem('reportEditingTime', editingTime.toString());
+    localStorage.setItem('reportLastSave', new Date().toISOString());
+});
+    </script>
+</body>
+</html>
