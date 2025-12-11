@@ -695,3 +695,135 @@ body {
     grid-template-columns: 2fr 1fr 0.5fr 0.5fr 1fr;
     gap: 1rem;
     padding
+
+/* Add these to the end of your literature.css file */
+
+/* Fix Modal Positioning */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+    overflow-y: auto; /* Add scroll if needed */
+}
+
+/* Ensure modal is centered */
+.modal-dialog {
+    position: relative;
+    margin: auto;
+    max-height: 85vh;
+    overflow-y: auto;
+}
+
+/* Form Button Styles */
+.form-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.btn {
+    min-width: 120px;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-primary {
+    background: #3f51b5;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #303f9f;
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: #e0e0e0;
+    color: #333;
+}
+
+.btn-secondary:hover {
+    background: #bdbdbd;
+}
+
+/* Fix select dropdown styling */
+select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background: white url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") no-repeat right 12px center;
+    background-size: 16px;
+    padding-right: 40px !important;
+}
+
+/* Fix form validation */
+input:invalid, textarea:invalid {
+    border-color: #f44336 !important;
+}
+
+input:valid, textarea:valid {
+    border-color: #4caf50 !important;
+}
+
+/* Fix modal scrolling */
+.modal-body {
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+/* Fix close button position */
+.modal-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: white;
+    z-index: 1;
+}
+
+/* Fix form group spacing */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-help {
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 0.25rem;
+    font-style: italic;
+}
+
+.required {
+    color: #f44336;
+}
+
+/* Fix tags input */
+#literature-tags {
+    background: #f8f9fa;
+}
+
+/* Fix the main content to not be hidden behind navbar */
+.main-content {
+    margin-top: 80px; /* Height of navbar */
+}
