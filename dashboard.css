@@ -1,22 +1,38 @@
 /* Dashboard Specific Styles */
 
+:root {
+    --primary-color: #2563eb;
+    --secondary-color: #7c3aed;
+    --accent-color: #10b981;
+    --warning-color: #f59e0b;
+    --danger-color: #ef4444;
+    --dark-color: #1f2937;
+    --light-color: #f9fafb;
+    --gray-color: #6b7280;
+    --border-color: #e5e7eb;
+}
+
 .dashboard-main {
     max-width: 1400px;
     margin: 80px auto 0;
     padding: 2rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: calc(100vh - 80px);
 }
 
 .dashboard-header {
     margin-bottom: 2rem;
+    color: white;
 }
 
 .dashboard-header h1 {
-    color: var(--dark-color);
+    color: white;
     font-size: 2.5rem;
     margin-bottom: 2rem;
     display: flex;
     align-items: center;
     gap: 1rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .dashboard-stats {
@@ -27,18 +43,21 @@
 }
 
 .stat-card {
-    background: white;
+    background: rgba(255, 255, 255, 0.95);
     padding: 1.5rem;
     border-radius: 1rem;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
     display: flex;
     align-items: center;
     gap: 1.5rem;
-    transition: transform 0.3s ease;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .stat-card:hover {
     transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
 }
 
 .stat-icon {
@@ -48,6 +67,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
 .stat-icon i {
@@ -58,11 +78,13 @@
     font-size: 2rem;
     color: var(--dark-color);
     margin-bottom: 0.25rem;
+    font-weight: 700;
 }
 
 .stat-info p {
     color: var(--gray-color);
     font-weight: 500;
+    font-size: 0.9rem;
 }
 
 .dashboard-grid {
@@ -79,11 +101,13 @@
 }
 
 .dashboard-card {
-    background: white;
+    background: rgba(255, 255, 255, 0.95);
     border-radius: 1rem;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
     margin-bottom: 2rem;
     overflow: hidden;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .dashboard-card.full-width {
@@ -103,16 +127,24 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    font-weight: 600;
 }
 
 .card-header select {
     padding: 0.5rem 1rem;
-    border: 1px solid var(--border-color);
+    border: 2px solid var(--border-color);
     border-radius: 0.5rem;
     background: white;
     color: var(--dark-color);
     font-weight: 500;
     cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.card-header select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 .card-content {
@@ -121,8 +153,9 @@
 
 /* Progress Chart */
 #progressChart {
-    width: 100%;
-    height: 300px;
+    width: 100% !important;
+    height: 300px !important;
+    max-height: 300px;
 }
 
 /* Deadline List */
@@ -140,22 +173,35 @@
     border-radius: 0.75rem;
     border: 1px solid var(--border-color);
     transition: all 0.3s ease;
+    background: white;
 }
 
 .deadline-item.urgent {
     border-color: #fca5a5;
     background: #fef2f2;
+    animation: pulseWarning 2s infinite;
+}
+
+@keyframes pulseWarning {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+    50% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
 }
 
 .deadline-item:hover {
     border-color: var(--primary-color);
     background: rgba(37, 99, 235, 0.02);
+    transform: translateX(5px);
+}
+
+.deadline-info {
+    flex: 1;
 }
 
 .deadline-info h4 {
     font-size: 1rem;
     color: var(--dark-color);
     margin-bottom: 0.25rem;
+    font-weight: 600;
 }
 
 .deadline-info p {
@@ -165,6 +211,7 @@
 
 .deadline-date {
     text-align: right;
+    min-width: 120px;
 }
 
 .days-left {
@@ -172,6 +219,11 @@
     font-weight: 600;
     color: var(--dark-color);
     margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+}
+
+.days-left.urgent {
+    color: #ef4444;
 }
 
 .date {
@@ -191,6 +243,7 @@
     gap: 1rem;
     padding-bottom: 1.5rem;
     border-bottom: 1px solid var(--border-color);
+    align-items: flex-start;
 }
 
 .activity-item:last-child {
@@ -214,9 +267,14 @@
     font-size: 1.25rem;
 }
 
+.activity-content {
+    flex: 1;
+}
+
 .activity-content p {
     margin-bottom: 0.25rem;
     color: var(--dark-color);
+    line-height: 1.4;
 }
 
 .activity-content p:first-child {
@@ -226,6 +284,8 @@
 .activity-time {
     font-size: 0.875rem;
     color: var(--gray-color);
+    display: block;
+    margin-top: 0.25rem;
 }
 
 /* Quick Links */
@@ -247,11 +307,14 @@
     color: var(--dark-color);
     transition: all 0.3s ease;
     text-align: center;
+    border: 1px solid rgba(37, 99, 235, 0.1);
 }
 
 .quick-link:hover {
     background: rgba(37, 99, 235, 0.1);
     transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.15);
+    border-color: rgba(37, 99, 235, 0.3);
 }
 
 .quick-link i {
@@ -261,6 +324,7 @@
 
 .quick-link span {
     font-weight: 500;
+    font-size: 0.95rem;
 }
 
 /* Mini Timeline */
@@ -268,12 +332,13 @@
     display: flex;
     justify-content: space-between;
     position: relative;
+    padding: 1rem 0;
 }
 
 .timeline-mini::before {
     content: '';
     position: absolute;
-    top: 20px;
+    top: 40px;
     left: 20px;
     right: 20px;
     height: 3px;
@@ -286,6 +351,7 @@
     position: relative;
     z-index: 2;
     padding: 0 0.5rem;
+    text-align: center;
 }
 
 .phase-dot {
@@ -294,7 +360,9 @@
     background: white;
     border: 3px solid var(--border-color);
     border-radius: 50%;
-    margin-bottom: 1rem;
+    margin: 0 auto 1rem;
+    position: relative;
+    z-index: 2;
 }
 
 .timeline-phase-mini.active .phase-dot {
@@ -303,10 +371,20 @@
     animation: pulse 2s infinite;
 }
 
+@keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+    50% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+}
+
+.phase-info {
+    padding-top: 0.5rem;
+}
+
 .phase-info h4 {
     font-size: 0.875rem;
     color: var(--dark-color);
     margin-bottom: 0.25rem;
+    font-weight: 600;
 }
 
 .phase-info p {
@@ -333,6 +411,11 @@
     color: #6b7280;
 }
 
+.status-mini.complete {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
+
 /* Chemistry Grid */
 .chemistry-grid {
     display: grid;
@@ -345,6 +428,7 @@
     border: 1px solid var(--border-color);
     border-radius: 1rem;
     background: white;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
 }
 
 .chemistry-card h4 {
@@ -354,28 +438,213 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    font-weight: 600;
 }
 
-/* Dark Mode Support */
-[data-theme="dark"] .dashboard-card,
+/* Canvas Charts */
+.chemistry-card canvas {
+    width: 100% !important;
+    height: 200px !important;
+    max-height: 200px;
+}
+
+/* Responsive fixes */
+@media (max-width: 768px) {
+    .dashboard-main {
+        padding: 1rem;
+        margin-top: 60px;
+    }
+    
+    .dashboard-header h1 {
+        font-size: 2rem;
+    }
+    
+    .dashboard-stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+    
+    .stat-card {
+        padding: 1rem;
+        gap: 1rem;
+    }
+    
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .stat-icon i {
+        font-size: 1.5rem;
+    }
+    
+    .stat-info h3 {
+        font-size: 1.5rem;
+    }
+    
+    .chemistry-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .timeline-mini {
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    
+    .timeline-mini::before {
+        display: none;
+    }
+    
+    .timeline-phase-mini {
+        flex: 0 0 calc(50% - 0.5rem);
+    }
+    
+    .quick-links {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .card-header select {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .quick-links {
+        grid-template-columns: 1fr;
+    }
+    
+    .timeline-phase-mini {
+        flex: 0 0 100%;
+    }
+}
+
+/* Empty state for no data */
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--gray-color);
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.empty-state h4 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+    color: var(--dark-color);
+}
+
+.empty-state p {
+    font-size: 0.95rem;
+}
+
+/* Loading animation */
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 3rem;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--border-color);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Dark Mode Support - Fixed */
+[data-theme="dark"] .dashboard-main {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+}
+
+[data-theme="dark"] .dashboard-header h1 {
+    color: #f3f4f6;
+}
+
 [data-theme="dark"] .stat-card,
+[data-theme="dark"] .dashboard-card,
 [data-theme="dark"] .chemistry-card {
-    background: #1a1a1a;
+    background: rgba(30, 30, 46, 0.95);
+    border-color: rgba(255, 255, 255, 0.1);
     color: #e0e0e0;
 }
 
-[data-theme="dark"] .card-header h3,
 [data-theme="dark"] .stat-info h3,
-[data-theme="dark"] .chemistry-card h4 {
-    color: #e0e0e0;
+[data-theme="dark"] .card-header h3,
+[data-theme="dark"] .chemistry-card h4,
+[data-theme="dark"] .deadline-info h4,
+[data-theme="dark"] .activity-content p {
+    color: #f3f4f6;
+}
+
+[data-theme="dark"] .stat-info p,
+[data-theme="dark"] .phase-info p,
+[data-theme="dark"] .date,
+[data-theme="dark"] .activity-time,
+[data-theme="dark"] .deadline-info p {
+    color: #9ca3af;
 }
 
 [data-theme="dark"] .deadline-item {
-    background: #2a2a2a;
-    border-color: #333;
+    background: rgba(30, 30, 46, 0.8);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .deadline-item.urgent {
+    background: rgba(220, 38, 38, 0.1);
+    border-color: rgba(220, 38, 38, 0.3);
 }
 
 [data-theme="dark"] .quick-link {
-    background: #2a2a2a;
+    background: rgba(30, 30, 46, 0.8);
     color: #e0e0e0;
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .quick-link:hover {
+    background: rgba(37, 99, 235, 0.2);
+    border-color: rgba(37, 99, 235, 0.4);
+}
+
+[data-theme="dark"] .card-header select {
+    background: rgba(30, 30, 46, 0.8);
+    color: #e0e0e0;
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+[data-theme="dark"] .phase-dot {
+    background: rgba(30, 30, 46, 0.8);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+[data-theme="dark"] .activity-icon {
+    background: rgba(37, 99, 235, 0.2);
+}
+
+[data-theme="dark"] .activity-icon i {
+    color: #60a5fa;
+}
+
+[data-theme="dark"] .timeline-mini::before {
+    background: rgba(255, 255, 255, 0.1);
 }
