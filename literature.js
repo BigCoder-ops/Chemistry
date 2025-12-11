@@ -758,4 +758,293 @@ class LiteratureManager {
     showNotification(message, type = 'success') {
         // Create notification element
         const notification = document.createElement('div');
-        notification
+        notification.className = `notification ${type}`;
+        notification.innerHTML = `
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+            <span>${message}</span>
+        `;
+        
+        // Add styles if not already present
+        if (!document.querySelector('#notification-styles')) {
+            const styles = document.createElement('style');
+            styles.id = 'notification-styles';
+            styles.textContent = `
+                .notification {
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: #4caf50;
+                    color: white;
+                    padding: 15px 20px;
+                    border-radius: 8px;
+                    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    z-index: 3000;
+                    animation: slideIn 0.3s ease;
+                    max-width: 400px;
+                }
+                .notification.error {
+                    background: #f44336;
+                }
+                .notification.fade-out {
+                    animation: fadeOut 0.3s ease forwards;
+                }
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes fadeOut {
+                    to { opacity: 0; transform: translateX(100%); }
+                }
+            `;
+            document.head.appendChild(styles);
+        }
+        
+        // Add to page
+        document.body.appendChild(notification);
+        
+        // Remove after 3 seconds
+        setTimeout(() => {
+            notification.classList.add('fade-out');
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    document.body.removeChild(notification);
+                }
+            }, 300);
+        }, 3000);
+    }
+    
+    viewLiterature(id) {
+        console.log('Viewing literature id:', id);
+        const item = this.literatureData.find(i => i.id === id);
+        if (!item) {
+            console.error('Item not found:', id);
+            return;
+        }
+        
+        const modal = document.getElementById('view-modal');
+        const content = document.getElementById('view-content');
+        
+        // Format authors list
+        const authorsList = item.authors.split(';').map(author => 
+            `<li>${author.trim()}</li>`
+        ).join('');
+        
+        // Format tags
+        const tagsHTML = item.tags.map(tag => 
+            `<span class="view-tag">${tag}</span>`
+        ).join('');
+        
+        // Create citation
+        const citation = this.generateCitation(item);
+        
+        content.innerHTML = `
+            <div class="view-field">
+                <label>Title</label>
+                <p>${item.title}</p>
+            </div>
+            <div class="view-field">
+                <label>Authors</label>
+                <ul style="margin-left: 20px; margin-top: 5px;">${authorsList}</ul>
+            </div>
+            <div class="view-field">
+                <label>Publication Details</label>
+                <p>
+                    <strong>Journal:</strong> ${item.journal}<br>
+                    <strong>Year:</strong> ${item.year}<br>
+                    ${item.volume ? `<strong>Volume:</strong> ${item.volume}<br>` : ''}
+                    ${item.pages ? `<strong>Pages:</strong> ${item.pages}<br>` : ''}
+                    ${item.doi ? `<strong>DOI:</strong> ${item.doi}<br>` : ''}
+                </p>
+            </div>
+            <div class="view-field">
+                <label>Status & Priority</label>
+                <p>
+                    <strong>Status:</strong> <span class="status-badge status-${item.status}">${item.status.charAt(0).toUpperCase() + item.status.slice(1)}</span><br>
+                    <strong>Priority:</strong> ${item.priority ? item.priority.charAt(0).toUpperCase() + item.priority.slice(1) : 'Medium'}
+                </p>
+            </div>
+            <div class="view-field">
+                <label>Abstract</label>
+                <p>${item.abstract}</p>
+            </div>
+            <div class="view-field">
+                <label>Tags</label>
+                <div class="view-tags">${tagsHTML}</div>
+            </div>
+            <div class="view-field">
+                <label>Citation</label>
+                <p style="font-style: italic; background: #f8f9fa; padding: 10px; border-radius: 5px;">
+                    ${citation}
+                </p>
+            </div>
+            ${item.notes ? `
+            <div class="view-field">
+                <label>Personal Notes</label>
+                <p style="background: #fff8e1; padding: 10px; border-radius: 5px; border-left: 4px solid #ff9800;">
+                    ${item.notes}
+                </p>
+            </div>
+            ` : ''}
+            <div class="view-field">
+                <label>Additional Information</label>
+                <p>
+                    ${item.url ? `<strong>URL:</strong> <a href="${item.url}" target="_blank">${item.url}</a><br>` : ''}
+                    <strong>Added:</strong> ${item.addedDate || 'Unknown'}<br>
+                    <strong>Saved:</strong> ${item.saved ? 'Yes' : 'No'}
+                </p>
+            </div>
+        `;
+        
+        // Store current item ID for edit button
+        this.viewingId = id;
+        
+        if (modal) {
+            modal.style.display = 'flex';
+        }
+    }
+    
+    closeViewModal() {
+        const modal = document.getElementById('view-modal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+        this.viewingId = null;
+    }
+    
+    editCurrentLiterature() {
+        if (this.viewingId) {
+            this.closeViewModal();
+            this.openAddModal(this.viewingId);
+        }
+    }
+    
+    generateCitation(item) {
+        // Format authors
+        const authors = item.authors.split(';');
+        let authorString;
+        
+        if (authors.length === 1) {
+            authorString = authors[0].trim();
+        } else if (authors.length === 2) {
+            authorString = `${authors[0].trim()} and ${authors[1].trim()}`;
+        } else {
+            authorString = `${authors[0].trim()} et al.`;
+        }
+        
+        // Build citation
+        let citation = `${authorString} (${item.year}). ${item.title}. `;
+        citation += `<em>${item.journal}</em>`;
+        
+        if (item.volume) {
+            citation += `, ${item.volume}`;
+            if (item.pages) {
+                citation += `, ${item.pages}`;
+            }
+        } else if (item.pages) {
+            citation += `, ${item.pages}`;
+        }
+        
+        citation += '.';
+        
+        if (item.doi) {
+            citation += ` https://doi.org/${item.doi}`;
+        }
+        
+        return citation;
+    }
+    
+    copyCitation() {
+        if (!this.viewingId) return;
+        
+        const item = this.literatureData.find(i => i.id === this.viewingId);
+        if (!item) return;
+        
+        const citation = this.generateCitation(item);
+        
+        // Copy to clipboard
+        navigator.clipboard.writeText(citation.replace(/<[^>]*>/g, ''))
+            .then(() => {
+                this.showNotification('Citation copied to clipboard!');
+            })
+            .catch(err => {
+                console.error('Failed to copy citation:', err);
+                this.showNotification('Failed to copy citation', 'error');
+            });
+    }
+    
+    toggleSave(id) {
+        const item = this.literatureData.find(i => i.id === id);
+        if (item) {
+            item.saved = !item.saved;
+            this.saveToStorage();
+            this.render();
+            
+            this.showNotification(
+                item.saved ? 'Added to saved collection!' : 'Removed from saved collection',
+                'success'
+            );
+        }
+    }
+    
+    promptDelete(id) {
+        const item = this.literatureData.find(i => i.id === id);
+        if (!item) return;
+        
+        this.deletingId = id;
+        const modal = document.getElementById('delete-modal');
+        const preview = document.getElementById('delete-preview');
+        
+        preview.innerHTML = `
+            <strong>${item.title}</strong><br>
+            <small>${item.authors.split(';')[0]} (${item.year})</small>
+        `;
+        
+        if (modal) {
+            modal.style.display = 'flex';
+        }
+    }
+    
+    confirmDelete() {
+        if (!this.deletingId) return;
+        
+        const index = this.literatureData.findIndex(item => item.id === this.deletingId);
+        if (index !== -1) {
+            this.literatureData.splice(index, 1);
+            this.saveToStorage();
+            this.render();
+            
+            this.showNotification('Literature deleted successfully!');
+        }
+        
+        this.closeDeleteModal();
+    }
+    
+    closeDeleteModal() {
+        const modal = document.getElementById('delete-modal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+        this.deletingId = null;
+    }
+    
+    closeImportExportModal() {
+        const modal = document.getElementById('import-export-modal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
+}
+
+// Initialize the application when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM loaded, initializing app...');
+    const app = new LiteratureManager();
+    app.initialize();
+    
+    // Make app available globally for debugging
+    window.literatureApp = app;
+    console.log('App initialized and available as window.literatureApp');
+});
