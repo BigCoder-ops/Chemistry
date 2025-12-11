@@ -200,96 +200,102 @@
                 <h3 id="modal-title">Add New Literature</h3>
                 <button class="modal-close" id="modal-close-btn">&times;</button>
             </div>
-            <div class="modal-body">
-                <form id="literature-form">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="literature-title">Title <span class="required">*</span></label>
-                            <input type="text" id="literature-title" required>
-                            <div class="form-help">Enter the full title of the paper</div>
-                        </div>
-                    </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="literature-authors">Authors <span class="required">*</span></label>
-                            <input type="text" id="literature-authors" placeholder="e.g., Smith, J.; Johnson, A.; Chen, X." required>
-                            <div class="form-help">Separate authors with semicolons</div>
-                        </div>
-                        <div class="form-group">
-                            <label for="literature-year">Year <span class="required">*</span></label>
-                            <input type="number" id="literature-year" min="1900" max="2025" value="2024" required>
-                        </div>
-                    </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="literature-journal">Journal/Conference <span class="required">*</span></label>
-                            <input type="text" id="literature-journal" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="literature-volume">Volume/Issue</label>
-                            <input type="text" id="literature-volume" placeholder="e.g., Vol. 12, Issue 3">
-                        </div>
-                    </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="literature-pages">Pages</label>
-                            <input type="text" id="literature-pages" placeholder="e.g., 123-145">
-                        </div>
-                        <div class="form-group">
-                            <label for="literature-status">Status</label>
-                            <select id="literature-status">
-                                <option value="unread">Unread</option>
-                                <option value="read">Read</option>
-                                <option value="reviewed" selected>Reviewed</option>
-                                <option value="cited">Cited</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="literature-abstract">Abstract/Summary <span class="required">*</span></label>
-                        <textarea id="literature-abstract" rows="4" required></textarea>
-                        <div class="form-help">Brief summary of the paper's content and findings</div>
-                    </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="literature-tags">Tags <span class="required">*</span></label>
-                            <input type="text" id="literature-tags" placeholder="e.g., electrochemistry, battery, materials" required>
-                            <div class="form-help">Separate tags with commas</div>
-                        </div>
-                        <div class="form-group">
-                            <label for="literature-priority">Priority</label>
-                            <select id="literature-priority">
-                                <option value="low">Low</option>
-                                <option value="medium" selected>Medium</option>
-                                <option value="high">High</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="literature-doi">DOI</label>
-                            <input type="text" id="literature-doi" placeholder="10.1000/xyz123">
-                        </div>
-                        <div class="form-group">
-                            <label for="literature-url">URL</label>
-                            <input type="url" id="literature-url" placeholder="https://example.com/paper">
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="literature-notes">Personal Notes</label>
-                        <textarea id="literature-notes" rows="3" placeholder="Add your personal insights, key takeaways, or future references..."></textarea>
-                    </div>
-                    
-                    <input type="hidden" id="literature-id" value="">
-                </form>
+           <!-- Replace the entire form section inside the modal-body with this: -->
+<div class="modal-body">
+    <form id="literature-form">
+        <div class="form-row">
+            <div class="form-group" style="flex: 2;">
+                <label for="literature-title">Title <span class="required">*</span></label>
+                <input type="text" id="literature-title" required>
+                <div class="form-help">Enter the full title of the paper</div>
             </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group" style="flex: 3;">
+                <label for="literature-authors">Authors <span class="required">*</span></label>
+                <input type="text" id="literature-authors" placeholder="e.g., Smith, J.; Johnson, A.; Chen, X." required>
+                <div class="form-help">Separate authors with semicolons</div>
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label for="literature-year">Year <span class="required">*</span></label>
+                <input type="number" id="literature-year" min="1900" max="2025" value="2024" required>
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group" style="flex: 2;">
+                <label for="literature-journal">Journal/Conference <span class="required">*</span></label>
+                <input type="text" id="literature-journal" required>
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label for="literature-volume">Volume/Issue</label>
+                <input type="text" id="literature-volume" placeholder="e.g., Vol. 12, Issue 3">
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label for="literature-pages">Pages</label>
+                <input type="text" id="literature-pages" placeholder="e.g., 123-145">
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group" style="flex: 1;">
+                <label for="literature-status">Status <span class="required">*</span></label>
+                <select id="literature-status" required>
+                    <option value="unread">Unread</option>
+                    <option value="read">Read</option>
+                    <option value="reviewed" selected>Reviewed</option>
+                    <option value="cited">Cited</option>
+                </select>
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label for="literature-priority">Priority</label>
+                <select id="literature-priority">
+                    <option value="low">Low</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="high">High</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="literature-abstract">Abstract/Summary <span class="required">*</span></label>
+            <textarea id="literature-abstract" rows="4" required placeholder="Enter the abstract or summary of the paper..."></textarea>
+            <div class="form-help">Brief summary of the paper's content and findings</div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group" style="flex: 2;">
+                <label for="literature-tags">Tags <span class="required">*</span></label>
+                <input type="text" id="literature-tags" placeholder="e.g., electrochemistry, battery, materials" required>
+                <div class="form-help">Separate tags with commas</div>
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label for="literature-doi">DOI</label>
+                <input type="text" id="literature-doi" placeholder="10.1000/xyz123">
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group" style="flex: 1;">
+                <label for="literature-url">URL</label>
+                <input type="url" id="literature-url" placeholder="https://example.com/paper">
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="literature-notes">Personal Notes</label>
+            <textarea id="literature-notes" rows="3" placeholder="Add your personal insights, key takeaways, or future references..."></textarea>
+        </div>
+        
+        <input type="hidden" id="literature-id" value="">
+        
+        <div class="form-buttons">
+            <button type="button" class="btn btn-secondary" id="modal-cancel-btn">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="modal-save-btn">Save Literature</button>
+        </div>
+    </form>
+</div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" id="modal-cancel-btn">Cancel</button>
                 <button type="button" class="btn btn-primary" id="modal-save-btn">Save Literature</button>
