@@ -1,6 +1,4 @@
-// Tasks Management JavaScript
 
-// Sample tasks data
 const sampleTasks = [
     {
         id: 1,
