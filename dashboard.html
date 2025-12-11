@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Project Volta</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-battery-full"></i>
+                <span>Project Volta</span>
+            </div>
+            <div class="nav-links">
+                <a href="index.html"><i class="fas fa-home"></i> Home</a>
+                <a href="dashboard.html" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                <a href="tasks.html"><i class="fas fa-tasks"></i> Tasks</a>
+                <a href="literature.html"><i class="fas fa-book"></i> Literature</a>
+                <a href="report.html"><i class="fas fa-file-alt"></i> Report</a>
+                <a href="presentation.html"><i class="fas fa-presentation"></i> Presentation</a>
+            </div>
+            <div class="nav-user">
+                <span>Researcher</span>
+                <i class="fas fa-user-circle"></i>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Main Content -->
+    <main class="dashboard-main">
+        <div class="dashboard-header">
+            <h1><i class="fas fa-tachometer-alt"></i> Project Dashboard</h1>
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: rgba(37, 99, 235, 0.1);">
+                        <i class="fas fa-tasks" style="color: #2563eb;"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>8</h3>
+                        <p>Total Tasks</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: rgba(16, 185, 129, 0.1);">
+                        <i class="fas fa-check-circle" style="color: #10b981;"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>1</h3>
+                        <p>Completed</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1);">
+                        <i class="fas fa-clock" style="color: #f59e0b;"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>1</h3>
+                        <p>In Progress</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: rgba(239, 68, 68, 0.1);">
+                        <i class="fas fa-exclamation-triangle" style="color: #ef4444;"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>2</h3>
+                        <p>Due Soon</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- Left Column -->
+            <div class="dashboard-column">
+                <!-- Progress Chart -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-chart-line"></i> Overall Progress</h3>
+                        <select id="progress-view">
+                            <option value="phases">By Phases</option>
+                            <option value="weeks">By Weeks</option>
+                        </select>
+                    </div>
+                    <div class="card-content">
+                        <canvas id="progressChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Upcoming Deadlines -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-calendar-times"></i> Upcoming Deadlines</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="deadline-list">
+                            <div class="deadline-item urgent">
+                                <div class="deadline-info">
+                                    <h4>Problem Definition</h4>
+                                    <p>Phase I - Foundation & Definition</p>
+                                </div>
+                                <div class="deadline-date">
+                                    <span class="days-left">5 days left</span>
+                                    <span class="date">Dec 15, 2025</span>
+                                </div>
+                            </div>
+                            <div class="deadline-item">
+                                <div class="deadline-info">
+                                    <h4>Scientific Background Draft</h4>
+                                    <p>Phase I - Foundation & Definition</p>
+                                </div>
+                                <div class="deadline-date">
+                                    <span class="days-left">10 days left</span>
+                                    <span class="date">Dec 20, 2025</span>
+                                </div>
+                            </div>
+                            <div class="deadline-item">
+                                <div class="deadline-info">
+                                    <h4>Current Solutions Analysis</h4>
+                                    <p>Phase II - Analysis & Evaluation</p>
+                                </div>
+                                <div class="deadline-date">
+                                    <span class="days-left">25 days left</span>
+                                    <span class="date">Jan 5, 2026</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="dashboard-column">
+                <!-- Recent Activity -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-history"></i> Recent Activity</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="activity-list">
+                            <div class="activity-item">
+                                <div class="activity-icon">
+                                    <i class="fas fa-book"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <p><strong>Added literature source</strong></p>
+                                    <p>"Life Cycle Assessment of Lithium-ion Batteries" - Liu et al. (2021)</p>
+                                    <span class="activity-time">2 hours ago</span>
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-icon">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <p><strong>Completed task</strong></p>
+                                    <p>Initial literature review and bibliography compilation</p>
+                                    <span class="activity-time">Yesterday</span>
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-icon">
+                                    <i class="fas fa-edit"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <p><strong>Updated report section</strong></p>
+                                    <p>Introduction section - added geopolitical context</p>
+                                    <span class="activity-time">2 days ago</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="quick-links">
+                            <a href="tasks.html?filter=status:in_progress" class="quick-link">
+                                <i class="fas fa-play-circle"></i>
+                                <span>Continue Current Task</span>
+                            </a>
+                            <a href="literature.html#add-new" class="quick-link">
+                                <i class="fas fa-plus-square"></i>
+                                <span>Add New Source</span>
+                            </a>
+                            <a href="report.html" class="quick-link">
+                                <i class="fas fa-file-edit"></i>
+                                <span>Write Report</span>
+                            </a>
+                            <a href="presentation.html" class="quick-link">
+                                <i class="fas fa-sliders-h"></i>
+                                <span>Work on Presentation</span>
+                            </a>
+                            <a href="#" class="quick-link" onclick="exportProgress()">
+                                <i class="fas fa-download"></i>
+                                <span>Export Progress</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project Timeline -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-project-diagram"></i> Project Timeline</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="timeline-mini">
+                            <div class="timeline-phase-mini active">
+                                <div class="phase-dot"></div>
+                                <div class="phase-info">
+                                    <h4>Phase I</h4>
+                                    <p>Dec 2025</p>
+                                    <span class="status-mini in-progress">In Progress</span>
+                                </div>
+                            </div>
+                            <div class="timeline-phase-mini">
+                                <div class="phase-dot"></div>
+                                <div class="phase-info">
+                                    <h4>Phase II</h4>
+                                    <p>Jan 2026</p>
+                                    <span class="status-mini not-started">Not Started</span>
+                                </div>
+                            </div>
+                            <div class="timeline-phase-mini">
+                                <div class="phase-dot"></div>
+                                <div class="phase-info">
+                                    <h4>Phase III</h4>
+                                    <p>Jan 2026</p>
+                                    <span class="status-mini not-started">Not Started</span>
+                                </div>
+                            </div>
+                            <div class="timeline-phase-mini">
+                                <div class="phase-dot"></div>
+                                <div class="phase-info">
+                                    <h4>Phase IV</h4>
+                                    <p>Jan 2026</p>
+                                    <span class="status-mini not-started">Not Started</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chemistry Data Section -->
+        <div class="dashboard-card full-width">
+            <div class="card-header">
+                <h3><i class="fas fa-atom"></i> Battery Chemistry Data</h3>
+            </div>
+            <div class="card-content">
+                <div class="chemistry-grid">
+                    <div class="chemistry-card">
+                        <h4><i class="fas fa-bolt"></i> Energy Density Comparison</h4>
+                        <canvas id="energyDensityChart" height="200"></canvas>
+                    </div>
+                    <div class="chemistry-card">
+                        <h4><i class="fas fa-globe-americas"></i> Material Availability</h4>
+                        <canvas id="materialChart" height="200"></canvas>
+                    </div>
+                    <div class="chemistry-card">
+                        <h4><i class="fas fa-recycle"></i> Recyclability Rates</h4>
+                        <canvas id="recyclingChart" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/app.js"></script>
+    <script src="dashboard.js"></script>
+    <script>
+        // Initialize charts
+        document.addEventListener('DOMContentLoaded', function() {
+            initProgressChart();
+            initChemistryCharts();
+        });
+    </script>
+</body>
+</html>
